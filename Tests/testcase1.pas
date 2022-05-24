@@ -33,6 +33,8 @@ uses
   Forms;
 
 procedure TTestCase1.TestDatabaseUpgrade;
+var
+  Num: Integer;
 begin
   AssertEquals(0, DBVer.GetCurrentDBVersion);
   AssertEquals(0, DBHlp.TablesCount);
@@ -59,7 +61,30 @@ begin
   AssertTrue(DBHlp.TableExists('t4'));
   AssertEquals(3, DBHlp.TablesCount);
 
-  // ToDo: проверить реальное изменение данных в БД
+  AssertEquals(3 + 1, DBHlp.RowsCount('t1'));
+  AssertEquals(2, DBHlp.RowsCount('t2'));
+
+  with Query do
+  begin
+    Close;
+    SQL.Text := 'SELECT count(*) FROM t1 WHERE `str` = "new";';
+    Open;
+    First;
+    Num := Fields[0].AsInteger;
+    Close;
+  end;
+  AssertEquals(1, Num);
+
+  with Query do
+  begin
+    Close;
+    SQL.Text := 'SELECT `id` FROM t2 WHERE a=9 AND b=6;';
+    Open;
+    First;
+    Num := Fields[0].AsInteger;
+    Close;
+  end;
+  AssertEquals(2, Num);
 end;
 
 procedure TTestCase1.TestParams;

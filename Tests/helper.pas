@@ -33,6 +33,7 @@ type
       function ColumnExists(ATbl, ACol: String): Boolean;
       function TablesCount: Integer;
       function ColumnsCount(ATbl: String): Integer;
+      function RowsCount(ATbl: String): Integer;
   end;
 
 implementation
@@ -103,6 +104,21 @@ begin
     Close;
     SQL.Text := 'SELECT count(*) FROM PRAGMA_TABLE_INFO(:tbl);';
     ParamByName('tbl').AsString := ATbl;
+    Open;
+    First;
+    Result := Fields[0].AsInteger;
+    Close;
+  end;
+end;
+
+function TDBHelper.RowsCount(ATbl: String): Integer;
+begin
+  with Query do
+  begin
+    Close;
+    //SQL.Text := 'SELECT count(*) FROM :tbl';
+    //ParamByName('tbl').AsString := ATbl;
+    SQL.Text := 'SELECT count(*) FROM `' + ATbl + '`';
     Open;
     First;
     Result := Fields[0].AsInteger;
