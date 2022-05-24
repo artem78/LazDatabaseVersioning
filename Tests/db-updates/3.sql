@@ -1,0 +1,5 @@
+ALTER TABLE t1
+ADD COLUMN x integer;
+
+ALTER TABLE t1
+ADD COLUMN y integer;

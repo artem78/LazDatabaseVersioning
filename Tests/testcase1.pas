@@ -1,0 +1,146 @@
+unit TestCase1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, fpcunit, testutils, testregistry, SQLDB, SQLite3Conn,
+  Helper;
+
+type
+
+  { TTestCase1 }
+
+  TTestCase1= class(TTestCase)
+  protected
+    procedure SetUp; override;
+    procedure TearDown; override;
+  published
+    procedure TestParams;
+    procedure TestDatabaseUpgrade;
+  private
+    Conn: TSQLite3Connection;
+    Query: TSQLQuery;
+    Trans: TSQLTransaction;
+    DBHlp: TDBHelper;
+    DBVer: TDBVersioningHelper;
+  end;
+
+implementation
+
+uses
+  Forms;
+
+procedure TTestCase1.TestDatabaseUpgrade;
+begin
+  AssertEquals(0, DBVer.GetCurrentDBVersion);
+  AssertEquals(0, DBHlp.TablesCount);
+
+  DBVer.UpgradeTo(5); // --> 5
+  AssertEquals(5, DBVer.GetCurrentDBVersion);
+  AssertFalse(DBHlp.TableExists('t'));
+  AssertTrue(DBHlp.TableExists('t1'));
+  AssertTrue(DBHlp.ColumnExists('t1', 'flag'));
+  AssertTrue(DBHlp.ColumnExists('t1', 'x'));
+  AssertTrue(DBHlp.ColumnExists('t1', 'y'));
+  AssertEquals(5, DBHlp.ColumnsCount('t1'));
+  AssertTrue(DBHlp.TableExists('t2'));
+  AssertEquals(3, DBHlp.ColumnsCount('t2'));
+
+  DBVer.UpgradeTo(6); // 5 --> 6
+  AssertEquals(6, DBVer.GetCurrentDBVersion);
+  AssertTrue(DBHlp.TableExists('t3'));
+  AssertTrue(DBHlp.ColumnExists('t3', 'field'));
+
+  DBVer.UpgradeToLatest; // 6 --> 8
+  AssertEquals(8, DBVer.GetCurrentDBVersion);
+  AssertFalse(DBHlp.TableExists('t3'));
+  AssertTrue(DBHlp.TableExists('t4'));
+  AssertEquals(3, DBHlp.TablesCount);
+
+  // ToDo: проверить реальное изменение данных в БД
+end;
+
+procedure TTestCase1.TestParams;
+const
+  CurrVerParam = 'current_version';
+  Param2 = 'param2';
+  WrongParam = 'unknown';
+begin
+  // One parameter
+  {AssertFalse(DBVer.HasParam(CurrVerParam));
+  AssertEquals('', DBVer.GetParam(CurrVerParam));}
+  DBVer.SetParam(CurrVerParam, '555');
+  AssertTrue(DBVer.HasParam(CurrVerParam));
+  AssertEquals('555', DBVer.GetParam(CurrVerParam));
+  AssertEquals(555, DBVer.GetCurrentDBVersion);
+
+  // Add second parameter
+  DBVer.SetParam(Param2, 'hello world!');
+  AssertTrue(DBVer.HasParam(CurrVerParam));
+  AssertEquals('555', DBVer.GetParam(CurrVerParam));
+  AssertTrue(DBVer.HasParam(Param2));
+  AssertEquals('hello world!', DBVer.GetParam(Param2));
+
+  // Change value of first parameter
+  DBVer.SetParam(CurrVerParam, '321');
+  AssertEquals('321', DBVer.GetParam(CurrVerParam));
+  AssertEquals('hello world!', DBVer.GetParam(Param2));
+
+  // Recreate DBVer and check saved values
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Query);
+  AssertEquals('321', DBVer.GetParam(CurrVerParam));
+  AssertEquals('hello world!', DBVer.GetParam(Param2));
+
+  // Check for wrong parameter
+  AssertFalse(DBVer.HasParam(WrongParam));
+  AssertEquals('', DBVer.GetParam(WrongParam));
+end;
+
+procedure TTestCase1.SetUp;
+var
+  DBFile: String;
+begin
+  // Drop exists database file
+  DBFile := IncludeTrailingPathDelimiter(ExtractFileDir(Application.ExeName)) + 'test.db';
+  if FileExists(DBFile) then
+    DeleteFile(DBFile);
+
+  // Prepare database
+  Trans := TSQLTransaction.Create(Nil);
+  //Trans.DataBase := ;
+
+  Conn := TSQLite3Connection.Create(Nil);
+  Conn.DatabaseName := DBFile;
+  Conn.CharSet := 'UTF8';
+  Conn.Transaction := Trans;
+  Conn.Open;
+
+  Query := TSQLQuery.Create(Nil);
+  Query.SQLConnection := Conn;
+
+  Trans.Active := True;
+
+  // Create TDBVersioning instance
+  DBVer := TDBVersioningHelper.Create(Query);
+
+  // Create helper
+  DBHlp := TDBHelper.Create(Conn, Trans);
+end;
+
+procedure TTestCase1.TearDown;
+begin
+  FreeAndNil(DBHlp);
+  FreeAndNil(DBVer);
+  FreeAndNil(Query);
+  FreeAndNil(Conn);
+  FreeAndNil(Trans);
+end;
+
+initialization
+
+  RegisterTest(TTestCase1);
+end.
+
