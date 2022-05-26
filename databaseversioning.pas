@@ -29,7 +29,8 @@ type
       function GetLatestVersion: Integer;
 
     public
-      constructor Create(ASQLQuery: TSQLQuery);
+      constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
+      destructor Destroy;
 
       procedure UpgradeTo(AVer: Integer);
       procedure UpgradeToLatest;
@@ -45,13 +46,20 @@ const
 
 { TDBVersioning }
 
-constructor TDBVersioning.Create(ASQLQuery: TSQLQuery);
+constructor TDBVersioning.Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
 begin
-  SQLQuery := ASQLQuery;
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
 
   CreateDBInfoTable;
 
   SQLDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFileDir({Application.ExeName} ParamStr(0))) + 'db-updates');
+end;
+
+destructor TDBVersioning.Destroy;
+begin
+  SQLQuery.Free;
 end;
 
 procedure TDBVersioning.UpgradeTo(AVer: Integer);
