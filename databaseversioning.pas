@@ -32,6 +32,9 @@ type
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
       destructor Destroy;
 
+      property CurrentVersion: Integer read GetCurrentDBVersion;
+      property LatestVersion: Integer read GetLatestVersion;
+
       procedure UpgradeTo(AVer: Integer);
       procedure UpgradeToLatest;
       function UpgradeNeeded: Boolean;
