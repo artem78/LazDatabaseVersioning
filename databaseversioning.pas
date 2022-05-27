@@ -73,6 +73,9 @@ var
   SQLScript: TSQLScript;
   Tmp: TStringList;
 begin
+  if {not UpgradeNeeded} CurrentVersion = AVer then
+    Exit;
+
   Tmp := TStringList.Create;
   SQLScript := TSQLScript.Create(Nil);
   try
