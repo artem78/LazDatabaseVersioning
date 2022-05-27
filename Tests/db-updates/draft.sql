@@ -1,0 +1,3 @@
+/* DRAFT !!! */
+
+CREATE TABLE draft ();

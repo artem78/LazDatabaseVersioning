@@ -185,7 +185,7 @@ function TDBVersioning.GetLatestVersion: Integer;
 var
   FileList: TStringList;
   FileName: String;
-  I: Integer;
+  I, Version: Integer;
 begin
   Result := 0;
   FileList := FindAllFiles(SQLDir, '*.sql', False);
@@ -193,7 +193,12 @@ begin
     for I := 0 to FileList.Count - 1 do
     begin
       FileName := ExtractFileName(FileList[I]);
-      Result := Max(Result, StrToInt(ExtractFileNameWithoutExt(FileName)));
+      try
+        Version := StrToInt(ExtractFileNameWithoutExt(FileName));
+        Result := Max(Result, Version);
+      except
+        // Skip SQL-files with illegal names
+      end;
     end;
   finally
     FileList.Free;
