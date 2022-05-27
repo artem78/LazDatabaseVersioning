@@ -68,7 +68,7 @@ end;
 
 procedure TDBVersioning.UpgradeTo(AVer: Integer);
 var
-  Ver: Integer;
+  Ver, OldVer: Integer;
   SqlFileName: String;
   SQLScript: TSQLScript;
   Tmp: TStringList;
@@ -97,8 +97,10 @@ begin
 
   (SQLQuery.Transaction as TSQLTransaction).CommitRetaining;
 
+  OldVer := CurrentVersion;
   SetCurrentDBVersion(AVer);
   SetParam('last_upgrade', FormatDateTime('yyyy-mm-dd hh:nn:ss', Now));
+  SetParam('previous_version', IntToStr(OldVer));
 end;
 
 procedure TDBVersioning.UpgradeToLatest;
