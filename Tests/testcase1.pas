@@ -115,7 +115,7 @@ begin
 
   // Recreate DBVer and check saved values
   FreeAndNil(DBVer);
-  DBVer := TDBVersioningHelper.Create(Query);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans);
   AssertEquals('321', DBVer.GetParam(CurrVerParam));
   AssertEquals('hello world!', DBVer.GetParam(Param2));
 
@@ -149,7 +149,7 @@ begin
   Trans.Active := True;
 
   // Create TDBVersioning instance
-  DBVer := TDBVersioningHelper.Create(Query);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans);
 
   // Create helper
   DBHlp := TDBHelper.Create(Conn, Trans);
