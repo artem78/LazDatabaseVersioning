@@ -75,7 +75,7 @@
     </Linking>
   </CompilerOptions>
   <Debugging>
-    <Exceptions Count="4">
+    <Exceptions Count="6">
       <Item1>
         <Name Value="EAbort"/>
       </Item1>
@@ -88,6 +88,12 @@
       <Item4>
         <Name Value="ESQLDatabaseError"/>
       </Item4>
+      <Item5>
+        <Name Value="EConvertError"/>
+      </Item5>
+      <Item6>
+        <Name Value="EAssertionFailedError"/>
+      </Item6>
     </Exceptions>
   </Debugging>
 </CONFIG>
