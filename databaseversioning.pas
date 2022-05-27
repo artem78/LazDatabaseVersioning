@@ -34,6 +34,7 @@ type
 
       procedure UpgradeTo(AVer: Integer);
       procedure UpgradeToLatest;
+      function UpgradeNeeded: Boolean;
   end;
 
 implementation
@@ -96,6 +97,11 @@ end;
 procedure TDBVersioning.UpgradeToLatest;
 begin
   UpgradeTo(GetLatestVersion);
+end;
+
+function TDBVersioning.UpgradeNeeded: Boolean;
+begin
+  Result := GetCurrentDBVersion < GetLatestVersion;
 end;
 
 procedure TDBVersioning.CreateDBInfoTable;

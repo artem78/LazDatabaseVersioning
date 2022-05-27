@@ -38,6 +38,7 @@ var
 begin
   AssertEquals(0, DBVer.GetCurrentDBVersion);
   AssertEquals(0, DBHlp.TablesCount);
+  AssertTrue(DBVer.UpgradeNeeded);
 
   DBVer.UpgradeTo(5); // --> 5
   AssertEquals(5, DBVer.GetCurrentDBVersion);
@@ -49,11 +50,13 @@ begin
   AssertEquals(5, DBHlp.ColumnsCount('t1'));
   AssertTrue(DBHlp.TableExists('t2'));
   AssertEquals(3, DBHlp.ColumnsCount('t2'));
+  AssertTrue(DBVer.UpgradeNeeded);
 
   DBVer.UpgradeTo(6); // 5 --> 6
   AssertEquals(6, DBVer.GetCurrentDBVersion);
   AssertTrue(DBHlp.TableExists('t3'));
   AssertTrue(DBHlp.ColumnExists('t3', 'field'));
+  AssertTrue(DBVer.UpgradeNeeded);
 
   DBVer.UpgradeToLatest; // 6 --> 8
   AssertEquals(8, DBVer.GetCurrentDBVersion);
@@ -63,6 +66,7 @@ begin
 
   AssertEquals(3 + 1, DBHlp.RowsCount('t1'));
   AssertEquals(2, DBHlp.RowsCount('t2'));
+  AssertFalse(DBVer.UpgradeNeeded);
 
   with Query do
   begin
