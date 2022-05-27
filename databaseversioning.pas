@@ -98,6 +98,7 @@ begin
   (SQLQuery.Transaction as TSQLTransaction).CommitRetaining;
 
   SetCurrentDBVersion(AVer);
+  SetParam('last_upgrade', FormatDateTime('yyyy-mm-dd hh:nn:ss', Now));
 end;
 
 procedure TDBVersioning.UpgradeToLatest;
