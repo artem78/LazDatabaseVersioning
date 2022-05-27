@@ -80,7 +80,7 @@ begin
     begin
       SqlFileName := SqlDir + IntToStr(Ver) + '.sql';
       Tmp.LoadFromFile(SqlFileName);
-      SQLScript.Script.Append(Tmp.Text);
+      SQLScript.Script.AddStrings(Tmp);
     end;
 
     SQLScript.Execute;
