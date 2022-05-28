@@ -27,7 +27,7 @@ type
       Query: TSQLQuery;
     public
       constructor Create(AConn: TSQLConnection; ATrans: TSQLTransaction);
-      destructor Destroy;
+      destructor Destroy; override;
 
       function TableExists(ATbl: String): Boolean;
       function ColumnExists(ATbl, ACol: String): Boolean;
@@ -50,6 +50,8 @@ end;
 destructor TDBHelper.Destroy;
 begin
   Query.Free;
+
+  inherited;
 end;
 
 function TDBHelper.TableExists(ATbl: String): Boolean;

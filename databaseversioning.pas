@@ -30,7 +30,7 @@ type
 
     public
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
-      destructor Destroy;
+      destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
       property LatestVersion: Integer read GetLatestVersion;
@@ -64,6 +64,8 @@ end;
 destructor TDBVersioning.Destroy;
 begin
   SQLQuery.Free;
+
+  inherited;
 end;
 
 procedure TDBVersioning.UpgradeTo(AVer: Integer);

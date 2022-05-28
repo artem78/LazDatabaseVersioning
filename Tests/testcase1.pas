@@ -5,7 +5,7 @@ unit TestCase1;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testutils, testregistry, SQLDB, SQLite3Conn,
+  Classes, SysUtils, fpcunit, {testutils,} testregistry, SQLDB, SQLite3Conn,
   Helper;
 
 type
