@@ -122,8 +122,7 @@ begin
     Close;
     SQL.Text :=
       'CREATE TABLE IF NOT EXISTS `' + DBInfoTable + '` (' +
-        '`id` INTEGER PRIMARY KEY,' +
-        '`key` TEXT UNIQUE,' +
+        '`key` TEXT PRIMARY KEY,' +
         '`value` TEXT' +
       ')';
     ExecSQL;
