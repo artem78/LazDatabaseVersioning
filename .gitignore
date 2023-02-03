@@ -34,3 +34,6 @@ lib/
 
 
 /Tests/test.db
+
+# Linux executable
+DBVersioningTests
