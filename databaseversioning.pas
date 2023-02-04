@@ -93,7 +93,7 @@ begin
 
     for Ver := GetCurrentDBVersion + 1 to AVer do
     begin
-      SqlFileName := SqlDir + IntToStr(Ver) + '.sql';
+      SqlFileName := ConcatPaths([SqlDir, IntToStr(Ver) + '.sql']);
       Tmp.LoadFromFile(SqlFileName);
       SQLScript.Script.AddStrings(Tmp);
     end;
