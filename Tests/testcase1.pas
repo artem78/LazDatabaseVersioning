@@ -36,6 +36,9 @@ procedure TTestCase1.TestDatabaseUpgrade;
 var
   Num: Integer;
 begin
+  DBVer.SQLDir := ConcatPaths(['db-updates', 'test01']);
+
+
   AssertEquals(0, DBVer.GetCurrentDBVersion);
   AssertEquals(0, DBHlp.TablesCount);
   AssertTrue(DBVer.UpgradeNeeded);
