@@ -235,7 +235,7 @@ end;
 
 function TDBVersioning.DefaultSQLDir: String;
 begin
-  Result := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFileDir({Application.ExeName} ParamStr(0))) + 'db-updates')
+  Result := ConcatPaths([ExtractFileDir({Application.ExeName} ParamStr(0)), 'db-updates', '']);
 end;
 
 end.
