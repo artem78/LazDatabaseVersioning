@@ -15,7 +15,6 @@ type
     //private
     protected
       SQLQuery: TSQLQuery;
-      SQLDir: String;
 
       procedure CreateDBInfoTable;
 
@@ -28,8 +27,13 @@ type
 
       function GetLatestVersion: Integer;
 
+      function DefaultSQLDir: String;
+
     public
-      constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
+      SQLDir: String;
+
+      constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+        ASQLDir: String = '');
       destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
@@ -50,7 +54,8 @@ const
 
 { TDBVersioning }
 
-constructor TDBVersioning.Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction);
+constructor TDBVersioning.Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+  ASQLDir: String);
 begin
   SQLQuery := TSQLQuery.Create(Nil);
   SQLQuery.SQLConnection := AConnection;
@@ -58,7 +63,9 @@ begin
 
   CreateDBInfoTable;
 
-  SQLDir := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFileDir({Application.ExeName} ParamStr(0))) + 'db-updates');
+  SQLDir := ASQLDir;
+  if SQLDir = '' then
+    SQLDir := DefaultSQLDir;
 end;
 
 destructor TDBVersioning.Destroy;
@@ -219,6 +226,11 @@ begin
   finally
     FileList.Free;
   end;
+end;
+
+function TDBVersioning.DefaultSQLDir: String;
+begin
+  Result := IncludeTrailingPathDelimiter(IncludeTrailingPathDelimiter(ExtractFileDir({Application.ExeName} ParamStr(0))) + 'db-updates')
 end;
 
 end.
