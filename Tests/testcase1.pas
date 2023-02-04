@@ -20,6 +20,7 @@ type
     procedure TestParams;
     procedure TestDatabaseUpgrade;
     procedure TestDatabaseUpgradeFailures;
+    procedure TestDifferentFileNames;
   private
     Conn: TSQLite3Connection;
     Query: TSQLQuery;
@@ -110,6 +111,18 @@ begin
   AssertFalse(DBHlp.TableExists('t3'));
   AssertEquals(1, DBHlp.TablesCount);
   AssertEquals(1, DBVer.CurrentVersion);
+end;
+
+procedure TTestCase1.TestDifferentFileNames;
+begin
+  DBVer.SQLDir := ConcatPaths(['db-updates', 'test03']);
+
+  DBVer.UpgradeToLatest;
+
+  AssertEquals(4, DBVer.CurrentVersion);
+  AssertEquals(4, DBHlp.RowsCount('managers'));
+  AssertEquals(2, DBHlp.RowsCount('customers'));
+  AssertTrue(DBHlp.ColumnExists('managers', 'salary'));
 end;
 
 procedure TTestCase1.TestParams;

@@ -47,7 +47,7 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math;
+  FileUtil, LazFileUtils, Math, RegExpr;
 
 const
   DBInfoTable = '_db_info';
@@ -76,6 +76,30 @@ begin
 end;
 
 procedure TDBVersioning.UpgradeTo(AVer: Integer);
+  function FindSQLFileForVersion(AVer: Integer): String;
+  var
+    FileList: TStringList;
+    Re: TRegExpr;
+    I: Integer;
+    FileName: String;
+  begin
+    Result := '';
+
+    FileList := FindAllFiles(SQLDir, Format('*%d*.sql', [AVer]), False);
+    Re := TRegExpr.Create('^(\d+)');
+    try
+      for I := 0 to FileList.Count - 1 do
+      begin
+        FileName := ExtractFileName(FileList[I]);
+        if Re.Exec(FileName) and (Re.Match[1].ToInteger = AVer) then
+          Exit(FileList[I]);
+      end;
+    finally
+      FileList.Free;
+      Re.Free;
+    end;
+  end;
+
 var
   Ver, OldVer: Integer;
   SqlFileName: String;
@@ -94,7 +118,8 @@ begin
 
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
-        SqlFileName := ConcatPaths([SqlDir, IntToStr(Ver) + '.sql']);
+        SqlFileName := FindSQLFileForVersion(Ver);
+
         Tmp.LoadFromFile(SqlFileName);
         SQLScript.Script.AddStrings(Tmp);
       end;
@@ -214,22 +239,26 @@ var
   FileList: TStringList;
   FileName: String;
   I, Version: Integer;
+  Re: TRegExpr;
 begin
   Result := 0;
   FileList := FindAllFiles(SQLDir, '*.sql', False);
+  Re := TRegExpr.Create('^(\d+)');
   try
     for I := 0 to FileList.Count - 1 do
     begin
       FileName := ExtractFileName(FileList[I]);
       try
-        Version := StrToInt(ExtractFileNameWithoutExt(FileName));
+        if Re.Exec(FileName) then
+          Version := StrToInt(Re.Match[1]);
         Result := Max(Result, Version);
       except
-        // Skip SQL-files with illegal names
+        // Skip SQL-files without leading number
       end;
     end;
   finally
     FileList.Free;
+    Re.Free;
   end;
 end;
 
