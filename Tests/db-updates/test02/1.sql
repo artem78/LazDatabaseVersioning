@@ -1,0 +1,3 @@
+CREATE TABLE t0 (
+    `id`   INTEGER PRIMARY KEY
+);

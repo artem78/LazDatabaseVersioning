@@ -1,0 +1,5 @@
+DROP TABLE t1;
+
+CREATE TABLE t3 (
+    `id`   INTEGER PRIMARY KEY
+);

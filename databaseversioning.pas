@@ -88,17 +88,22 @@ begin
   Tmp := TStringList.Create;
   SQLScript := TSQLScript.Create(Nil);
   try
-    SQLScript.DataBase := SQLQuery.DataBase;
-    SQLScript.Transaction := SQLQuery.Transaction;
+    try
+      SQLScript.DataBase := SQLQuery.DataBase;
+      SQLScript.Transaction := SQLQuery.Transaction;
 
-    for Ver := GetCurrentDBVersion + 1 to AVer do
-    begin
-      SqlFileName := ConcatPaths([SqlDir, IntToStr(Ver) + '.sql']);
-      Tmp.LoadFromFile(SqlFileName);
-      SQLScript.Script.AddStrings(Tmp);
+      for Ver := GetCurrentDBVersion + 1 to AVer do
+      begin
+        SqlFileName := ConcatPaths([SqlDir, IntToStr(Ver) + '.sql']);
+        Tmp.LoadFromFile(SqlFileName);
+        SQLScript.Script.AddStrings(Tmp);
+      end;
+
+      SQLScript.Execute;
+    except
+      (SQLQuery.Transaction as TSQLTransaction).RollbackRetaining;
+      raise;
     end;
-
-    SQLScript.Execute;
   finally
     SQLScript.Free;
     Tmp.Free;

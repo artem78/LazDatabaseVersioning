@@ -19,6 +19,7 @@ type
   published
     procedure TestParams;
     procedure TestDatabaseUpgrade;
+    procedure TestDatabaseUpgradeFailures;
   private
     Conn: TSQLite3Connection;
     Query: TSQLQuery;
@@ -92,6 +93,23 @@ begin
     Close;
   end;
   AssertEquals(2, Num);
+end;
+
+procedure TTestCase1.TestDatabaseUpgradeFailures;
+begin
+  DBVer.SQLDir := ConcatPaths(['db-updates', 'test02']);
+
+  DBVer.UpgradeTo(1); // 0 --> 1
+  AssertTrue(DBHlp.TableExists('t0'));
+  AssertEquals(1, DBHlp.TablesCount);
+
+  AssertException({Exception} ESQLDatabaseError, @DBVer.UpgradeToLatest); // 1 --> 4 (should fail)
+  AssertTrue(DBHlp.TableExists('t0'));
+  AssertFalse(DBHlp.TableExists('t1'));
+  AssertFalse(DBHlp.TableExists('t2'));
+  AssertFalse(DBHlp.TableExists('t3'));
+  AssertEquals(1, DBHlp.TablesCount);
+  AssertEquals(1, DBVer.CurrentVersion);
 end;
 
 procedure TTestCase1.TestParams;

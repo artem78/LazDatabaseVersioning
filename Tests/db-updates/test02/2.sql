@@ -1,0 +1,13 @@
+CREATE TABLE t1 (
+    `id`   INTEGER PRIMARY KEY,
+    `str`  STRING,
+    `flag` BOOLEAN DEFAULT (FALSE) 
+                 NOT NULL ON CONFLICT REPLACE
+);
+
+CREATE TABLE t2 (
+    `id`   INTEGER PRIMARY KEY,
+    `str`  STRING,
+    `flag` BOOLEAN DEFAULT (FALSE) 
+                 NOT NULL ON CONFLICT REPLACE
+);
