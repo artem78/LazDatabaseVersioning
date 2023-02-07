@@ -8,6 +8,9 @@ uses
   Classes, SysUtils, fpcunit, {testutils,} testregistry, SQLDB, SQLite3Conn,
   Helper;
 
+const
+  SQLScriptsBaseDir = 'db-updates';
+
 type
 
   { TTestCase1 }
@@ -38,7 +41,7 @@ procedure TTestCase1.TestDatabaseUpgrade;
 var
   Num: Integer;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test01']);
+  DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test01']);
 
 
   AssertEquals(0, DBVer.GetCurrentDBVersion);
@@ -98,7 +101,7 @@ end;
 
 procedure TTestCase1.TestDatabaseUpgradeFailures;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test02']);
+  DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test02']);
 
   DBVer.UpgradeTo(1); // 0 --> 1
   AssertTrue(DBHlp.TableExists('t0'));
@@ -115,7 +118,7 @@ end;
 
 procedure TTestCase1.TestDifferentFileNames;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test03']);
+  DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test03']);
 
   DBVer.UpgradeToLatest;
 
