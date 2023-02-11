@@ -44,6 +44,8 @@ type
       function UpgradeNeeded: Boolean;
   end;
 
+  EDBVersioningException = class(Exception);
+
 implementation
 
 uses
@@ -119,6 +121,8 @@ begin
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
         SqlFileName := FindSQLFileForVersion(Ver);
+        if SqlFileName.IsEmpty then
+          raise EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [Ver]);
 
         Tmp.LoadFromFile(SqlFileName);
         SQLScript.Script.AddStrings(Tmp);

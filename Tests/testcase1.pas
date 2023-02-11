@@ -30,12 +30,14 @@ type
     Trans: TSQLTransaction;
     DBHlp: TDBHelper;
     DBVer: TDBVersioningHelper;
+
+    procedure UpgradeToIncorrectVersion;
   end;
 
 implementation
 
 uses
-  Forms;
+  Forms, DatabaseVersioning;
 
 procedure TTestCase1.TestDatabaseUpgrade;
 var
@@ -114,6 +116,9 @@ begin
   AssertFalse(DBHlp.TableExists('t3'));
   AssertEquals(1, DBHlp.TablesCount);
   AssertEquals(1, DBVer.CurrentVersion);
+
+  // Try to upgrade to non-existent version
+  AssertException(EDBVersioningException, @UpgradeToIncorrectVersion);
 end;
 
 procedure TTestCase1.TestDifferentFileNames;
@@ -126,6 +131,11 @@ begin
   AssertEquals(4, DBHlp.RowsCount('managers'));
   AssertEquals(2, DBHlp.RowsCount('customers'));
   AssertTrue(DBHlp.ColumnExists('managers', 'salary'));
+end;
+
+procedure TTestCase1.UpgradeToIncorrectVersion;
+begin
+  DBVer.UpgradeTo(9999);
 end;
 
 procedure TTestCase1.TestParams;
