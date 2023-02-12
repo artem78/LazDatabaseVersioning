@@ -122,7 +122,7 @@ begin
       begin
         SqlFileName := FindSQLFileForVersion(Ver);
         if SqlFileName.IsEmpty then
-          raise EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [Ver]);
+          raise {EFileNotFoundException}EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [Ver]);
 
         Tmp.LoadFromFile(SqlFileName);
         SQLScript.Script.AddStrings(Tmp);
