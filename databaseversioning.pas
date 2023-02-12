@@ -31,9 +31,12 @@ type
 
     public
       SQLDir: String;
+      SQLScripts: array of String;
 
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         ASQLDir: String = '');
+      constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+        const ASQLScripts: array of String);
       destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
@@ -70,8 +73,26 @@ begin
     SQLDir := DefaultSQLDir;
 end;
 
+constructor TDBVersioning.Create(AConnection: TSQLConnection;
+  ATransaction: TSQLTransaction; const ASQLScripts: array of String);
+var
+  I: Integer;
+begin
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
+
+  CreateDBInfoTable;
+
+  // ToDo: optimize, remake without array copying
+  SetLength(SQlScripts, Length(ASQLScripts));
+  for I := Low(ASQLScripts) to High(ASQLScripts) do
+    SQlScripts[I] := ASQLScripts[I];
+end;
+
 destructor TDBVersioning.Destroy;
 begin
+  SetLength(SQlScripts, 0);
   SQLQuery.Free;
 
   inherited;
@@ -103,7 +124,7 @@ procedure TDBVersioning.UpgradeTo(AVer: Integer);
   end;
 
 var
-  Ver, OldVer: Integer;
+  Ver, OldVer, Idx: Integer;
   SqlFileName: String;
   SQLScript: TSQLScript;
   Tmp: TStringList;
@@ -120,11 +141,22 @@ begin
 
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
-        SqlFileName := FindSQLFileForVersion(Ver);
-        if SqlFileName.IsEmpty then
-          raise {EFileNotFoundException}EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [Ver]);
+        if Length(SQLScripts) = 0 then
+        begin
+          SqlFileName := FindSQLFileForVersion(Ver);
+          if SqlFileName.IsEmpty then
+            raise {EFileNotFoundException}EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [Ver]);
 
-        Tmp.LoadFromFile(SqlFileName);
+          Tmp.LoadFromFile(SqlFileName);
+        end
+        else
+        begin
+          Idx := Ver - 1;
+          if (Idx < Low(SQLScripts)) or (Idx > High(SQLScripts)) then
+            raise EDBVersioningException.CreateFmt('Unable to find SQL script for version %d', [Ver]);
+
+          Tmp.Text := SQLScripts[Idx];
+        end;
         SQLScript.Script.AddStrings(Tmp);
       end;
 
@@ -245,24 +277,31 @@ var
   I, Version: Integer;
   Re: TRegExpr;
 begin
-  Result := 0;
-  FileList := FindAllFiles(SQLDir, '*.sql', False);
-  Re := TRegExpr.Create('^(\d+)');
-  try
-    for I := 0 to FileList.Count - 1 do
-    begin
-      FileName := ExtractFileName(FileList[I]);
-      try
-        if Re.Exec(FileName) then
-          Version := StrToInt(Re.Match[1]);
-        Result := Max(Result, Version);
-      except
-        // Skip SQL-files without leading number
+  if Length(SQLScripts) = 0 then
+  begin
+    Result := 0;
+    FileList := FindAllFiles(SQLDir, '*.sql', False);
+    Re := TRegExpr.Create('^(\d+)');
+    try
+      for I := 0 to FileList.Count - 1 do
+      begin
+        FileName := ExtractFileName(FileList[I]);
+        try
+          if Re.Exec(FileName) then
+            Version := StrToInt(Re.Match[1]);
+          Result := Max(Result, Version);
+        except
+          // Skip SQL-files without leading number
+        end;
       end;
+    finally
+      FileList.Free;
+      Re.Free;
     end;
-  finally
-    FileList.Free;
-    Re.Free;
+  end
+  else
+  begin
+    Result := High(SQlScripts) + 1;
   end;
 end;
 

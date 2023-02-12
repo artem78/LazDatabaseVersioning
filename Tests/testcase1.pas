@@ -24,6 +24,7 @@ type
     procedure TestDatabaseUpgrade;
     procedure TestDatabaseUpgradeFailures;
     procedure TestDifferentFileNames;
+    procedure TestBuiltInScripts;
   private
     Conn: TSQLite3Connection;
     Query: TSQLQuery;
@@ -131,6 +132,29 @@ begin
   AssertEquals(4, DBHlp.RowsCount('managers'));
   AssertEquals(2, DBHlp.RowsCount('customers'));
   AssertTrue(DBHlp.ColumnExists('managers', 'salary'));
+end;
+
+procedure TTestCase1.TestBuiltInScripts;
+const
+  SQLScripts: array [1..4] of string = (
+    'CREATE TABLE `t` (`id` INTEGER PRIMARY KEY, `first_name` STRING);',
+    'ALTER TABLE `t` RENAME TO `persons`;',
+    'ALTER TABLE `persons` ADD COLUMN `last_name` STRING;',
+    'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("John", "Doe");' + sLineBreak +
+        'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Mary", "Smith");' + sLineBreak +
+        'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Samanta", "Brown");'
+  );
+begin
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, SQLScripts);
+
+  AssertEquals(4, DBVer.LatestVersion);
+  AssertTrue(DBVer.UpgradeNeeded);
+  DBVer.UpgradeToLatest;
+  AssertEquals(4, DBVer.GetCurrentDBVersion);
+  AssertFalse(DBVer.UpgradeNeeded);
+  AssertTrue(DBHlp.TableExists('persons'));
+  AssertEquals(3, DBHlp.RowsCount('persons'));
 end;
 
 procedure TTestCase1.UpgradeToIncorrectVersion;
