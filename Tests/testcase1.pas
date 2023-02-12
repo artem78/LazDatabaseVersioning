@@ -155,6 +155,9 @@ begin
   AssertFalse(DBVer.UpgradeNeeded);
   AssertTrue(DBHlp.TableExists('persons'));
   AssertEquals(3, DBHlp.RowsCount('persons'));
+
+  // Check possible errors
+  AssertException(EDBVersioningException, @UpgradeToIncorrectVersion);
 end;
 
 procedure TTestCase1.UpgradeToIncorrectVersion;
