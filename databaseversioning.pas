@@ -45,6 +45,7 @@ type
       procedure UpgradeTo(AVer: Integer);
       procedure UpgradeToLatest;
       function UpgradeNeeded: Boolean;
+      function IsInitialized: Boolean;
   end;
 
   EDBVersioningException = class(Exception);
@@ -186,6 +187,11 @@ end;
 function TDBVersioning.UpgradeNeeded: Boolean;
 begin
   Result := GetCurrentDBVersion < GetLatestVersion;
+end;
+
+function TDBVersioning.IsInitialized: Boolean;
+begin
+  Result := CurrentVersion > 0;
 end;
 
 procedure TDBVersioning.CreateDBInfoTable;
