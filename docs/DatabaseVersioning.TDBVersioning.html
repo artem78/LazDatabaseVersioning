@@ -103,12 +103,10 @@ This is the class for managing database schema upgrades</p>
 <td class="itemcode"><span id="Create"></span><code>constructor <strong>Create</strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; ASQLDir: String = '');</code></td>
 </tr>
 <tr><td colspan="2">
-<p>
- string passed <em>ProgramDir</em>/db-updates/ will be used.</p>
-<h6 class="description_section">Parameters</h6>
+&nbsp;<h6 class="description_section">Parameters</h6>
 <dl class="parameters">
 <dt>ASQLDir</dt>
-<dd>Directory where *.sql files will be searched. If empty</dd>
+<dd>Directory where *.sql files will be searched. If empty string passed <em>ProgramDir</em>/db-updates/ will be used.</dd>
 </dl>
 </td></tr>
 </table>
@@ -118,12 +116,10 @@ This is the class for managing database schema upgrades</p>
 <td class="itemcode"><span id="Create"></span><code>constructor <strong>Create</strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; const ASQLScripts: array of String);</code></td>
 </tr>
 <tr><td colspan="2">
-<p>
- command separated with semicolon (<strong>;</strong>). Multiline strings allowed. Array indexes linked with versions (first item &mdash; version 1, second item &mdash; version 2, etc...).</p>
-<h6 class="description_section">Parameters</h6>
+&nbsp;<h6 class="description_section">Parameters</h6>
 <dl class="parameters">
 <dt>ASQLScripts</dt>
-<dd>Array of SQL commands. Each item may contains more than one</dd>
+<dd>Array of SQL commands. Each item may contains more than one command separated with semicolon (<strong>;</strong>). Multiline strings allowed. Array indexes linked with versions (first item &mdash; version 1, second item &mdash; version 2, etc...).</dd>
 </dl>
 </td></tr>
 </table>
@@ -142,7 +138,7 @@ This is the class for managing database schema upgrades</p>
 </tr>
 <tr><td colspan="2">
 <p>
-Upgrade database to specified version. If upgrade fails it rollback all changes to previous state.   (or any intermediate) not found </p>
+Upgrade database to specified version. If upgrade fails it rollback all changes to previous state.   </p>
 <h6 class="description_section">Parameters</h6>
 <dl class="parameters">
 <dt>AVer</dt>
@@ -151,7 +147,7 @@ Upgrade database to specified version. If upgrade fails it rollback all changes 
 <h6 class="description_section">Exceptions raised</h6>
 <dl class="exceptions_raised">
 <dt><a class="normal" href="DatabaseVersioning.EDBVersioningException.html">EDBVersioningException</a></dt>
-<dd>If SQL commands for specified version</dd>
+<dd>If SQL commands for specified version (or any intermediate) not found</dd>
 <dt><code>ESQLDatabaseError</code></dt>
 <dd>If error occured on executing SQL statements</dd>
 </dl>

@@ -34,15 +34,15 @@ type
       SQLDir: String;
       SQLScripts: array of String;
 
-      { @param ASQLDir Directory where *.sql files will be searched. If empty
-        string passed @italic(ProgramDir)/db-updates/ will be used. }
+      { @param(ASQLDir Directory where *.sql files will be searched. If empty
+        string passed @italic(ProgramDir)/db-updates/ will be used.) }
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         ASQLDir: String = '');
 
-      { @param ASQLScripts Array of SQL commands. Each item may contains more than one
+      { @param(ASQLScripts Array of SQL commands. Each item may contains more than one
         command separated with semicolon (@bold(;)). Multiline strings allowed. Array
         indexes linked with versions (first item --- version 1, second item ---
-        version 2, etc...). }
+        version 2, etc...).) }
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         const ASQLScripts: array of String);
       destructor Destroy; override;
@@ -55,14 +55,14 @@ type
 
       { Upgrade database to specified version. If upgrade fails it rollback all changes
         to previous state.
-        @param AVer New version to upgrade (> 1)
-        @raises EDBVersioningException If SQL commands for specified version
-        (or any intermediate) not found
-        @raises ESQLDatabaseError If error occured on executing SQL statements }
+        @param(AVer New version to upgrade (> 1))
+        @raises(EDBVersioningException If SQL commands for specified version
+        (or any intermediate) not found)
+        @raises(ESQLDatabaseError If error occured on executing SQL statements) }
       procedure UpgradeTo(AVer: Integer);
 
       { Upgrade database to latest possible version
-        @seealso UpgradeTo }
+        @seealso(UpgradeTo) }
       procedure UpgradeToLatest;
 
       { Checks if database can be upgraded to new version (has any not applied upgrades). }
