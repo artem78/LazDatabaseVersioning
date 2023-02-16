@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>DatabaseVersioning: Class TDBVersioning</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="PasDoc 0.16.0">
+<meta http-equiv="content-type" content="text/html; charset=utf-8">
+<link rel="StyleSheet" type="text/css" href="pasdoc.css">
+</head>
+<body>
+<div class="container"><div class="navigation">
+<ul><li><a href="AllUnits.html">Units</a></li><li><a href="ClassHierarchy.html">Class Hierarchy</a></li><li><a href="AllClasses.html">Classes, Interfaces, Objects and Records</a></li><li><a href="AllTypes.html">Types</a></li><li><a href="AllVariables.html">Variables</a></li><li><a href="AllConstants.html">Constants</a></li><li><a href="AllFunctions.html">Functions and Procedures</a></li><li><a href="AllIdentifiers.html">Identifiers</a></li></ul></div><div class="content">
+<span id="TDBVersioning"></span><h1 class="cio">Class TDBVersioning</h1>
+<div class="sections">
+<div class="one_section"><a class="section" href="#PasDoc-Description">Description</a></div><div class="one_section"><a class="section" href="#PasDoc-Hierarchy">Hierarchy</a></div><div class="one_section"><a class="section" href="#PasDoc-Fields">Fields</a></div><div class="one_section"><a class="section" href="#PasDoc-Methods">Methods</a></div><div class="one_section"><a class="section" href="#PasDoc-Properties">Properties</a></div></div>
+<span id="PasDoc-Description"></span><h2 class="unit">Unit</h2>
+<p class="unitlink">
+<a href="DatabaseVersioning.html">DatabaseVersioning</a></p>
+<h2 class="declaration">Declaration</h2>
+<p class="declaration">
+<code>type TDBVersioning = class(TObject)</code></p>
+<h2 class="description">Description</h2>
+<p>
+This is the class for managing database schema upgrades</p>
+<span id="PasDoc-Hierarchy"></span><h2 class="hierarchy">Hierarchy</h2>
+<ul class="hierarchy"><li class="ancestor">TObject</li>
+<li class="thisitem">TDBVersioning</li></ul><h2 class="overview">Overview</h2>
+<span id="PasDoc-Fields"></span><h3 class="summary">Fields</h3>
+<table class="summary wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#SQLDir">SQLDir</a></strong>: String;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#SQLScripts">SQLScripts</a></strong>: array of String;</code></td>
+</tr>
+</table>
+<span id="PasDoc-Methods"></span><h3 class="summary">Methods</h3>
+<table class="summary wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Create">Create</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; ASQLDir: String = '');</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Create">Create</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; const ASQLScripts: array of String);</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>destructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Destroy">Destroy</a></strong>; override;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>procedure <strong><a href="DatabaseVersioning.TDBVersioning.html#UpgradeTo">UpgradeTo</a></strong>(AVer: Integer);</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>procedure <strong><a href="DatabaseVersioning.TDBVersioning.html#UpgradeToLatest">UpgradeToLatest</a></strong>;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#UpgradeNeeded">UpgradeNeeded</a></strong>: Boolean;</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#IsInitialized">IsInitialized</a></strong>: Boolean;</code></td>
+</tr>
+</table>
+<span id="PasDoc-Properties"></span><h3 class="summary">Properties</h3>
+<table class="summary wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#CurrentVersion">CurrentVersion</a></strong>: Integer read GetCurrentDBVersion;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#LatestVersion">LatestVersion</a></strong>: Integer read GetLatestVersion;</code></td>
+</tr>
+</table>
+<h2 class="description">Description</h2>
+<h3 class="detail">Fields</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="SQLDir"></span><code><strong>SQLDir</strong>: String;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="SQLScripts"></span><code><strong>SQLScripts</strong>: array of String;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<h3 class="detail">Methods</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="Create"></span><code>constructor <strong>Create</strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; ASQLDir: String = '');</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+ string passed <em>ProgramDir</em>/db-updates/ will be used.</p>
+<h6 class="description_section">Parameters</h6>
+<dl class="parameters">
+<dt>ASQLDir</dt>
+<dd>Directory where *.sql files will be searched. If empty</dd>
+</dl>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="Create"></span><code>constructor <strong>Create</strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; const ASQLScripts: array of String);</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+ command separated with semicolon (<strong>;</strong>). Multiline strings allowed. Array indexes linked with versions (first item &mdash; version 1, second item &mdash; version 2, etc...).</p>
+<h6 class="description_section">Parameters</h6>
+<dl class="parameters">
+<dt>ASQLScripts</dt>
+<dd>Array of SQL commands. Each item may contains more than one</dd>
+</dl>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="Destroy"></span><code>destructor <strong>Destroy</strong>; override;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="UpgradeTo"></span><code>procedure <strong>UpgradeTo</strong>(AVer: Integer);</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Upgrade database to specified version. If upgrade fails it rollback all changes to previous state.   (or any intermediate) not found </p>
+<h6 class="description_section">Parameters</h6>
+<dl class="parameters">
+<dt>AVer</dt>
+<dd>New version to upgrade (&gt; 1)</dd>
+</dl>
+<h6 class="description_section">Exceptions raised</h6>
+<dl class="exceptions_raised">
+<dt><a class="normal" href="DatabaseVersioning.EDBVersioningException.html">EDBVersioningException</a></dt>
+<dd>If SQL commands for specified version</dd>
+<dt><code>ESQLDatabaseError</code></dt>
+<dd>If error occured on executing SQL statements</dd>
+</dl>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="UpgradeToLatest"></span><code>procedure <strong>UpgradeToLatest</strong>;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Upgrade database to latest possible version </p>
+<h6 class="description_section">See also</h6>
+<dl class="see_also">
+  <dt><a class="normal" href="DatabaseVersioning.TDBVersioning.html#UpgradeTo">UpgradeTo</a></dt>
+  <dd></dd>
+</dl>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="UpgradeNeeded"></span><code>function <strong>UpgradeNeeded</strong>: Boolean;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Checks if database can be upgraded to new version (has any not applied upgrades).</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="IsInitialized"></span><code>function <strong>IsInitialized</strong>: Boolean;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Checks if database not empty and has any upgrades applied. For the first run should return <code>False</code>.</p>
+</td></tr>
+</table>
+<h3 class="detail">Properties</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="CurrentVersion"></span><code>property <strong>CurrentVersion</strong>: Integer read GetCurrentDBVersion;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Returns the version of the database it is in</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="LatestVersion"></span><code>property <strong>LatestVersion</strong>: Integer read GetLatestVersion;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+Returns last available for upgrade version</p>
+</td></tr>
+</table>
+<hr><span class="appinfo"><em>Generated by <a href="https://pasdoc.github.io/">PasDoc 0.16.0</a>. </em>
+</span>
+</div></div></body></html>
