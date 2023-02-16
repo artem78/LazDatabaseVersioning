@@ -1,7 +1,7 @@
 [Main]
 StoreRelativePaths=1
-Language=ru.utf8
-OutputDir=html/
+Language=en
+OutputDir=docs
 GenerateFormat=0
 ProjectName=
 Verbosity=2
@@ -61,12 +61,13 @@ Count=0
 Count=0
 
 [IncludeDirectories]
-Count=1
+Count=2
 Item_0=../../LazDatabaseVersioning
+Item_1=../LazDatabaseVersioning
 
 [Files]
 Count=1
-Item_0=../databaseversioning.pas
+Item_0=databaseversioning.pas
 
 [AdditionalFiles]
 Count=0
