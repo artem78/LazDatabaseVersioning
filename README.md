@@ -6,6 +6,10 @@ This will help you to auto upgrade database scheme.
 
 - Sqlite only (not tested with other databases)
 
+## Documentation
+
+Go to https://artem78.github.io/LazDatabaseVersioning/
+
 ## ToDos
 - [ ] Write description and usage instructions
 - [ ] Allow to place SQL commands in code in addition to use separate files
