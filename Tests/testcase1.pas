@@ -25,6 +25,7 @@ type
     procedure TestDatabaseUpgradeFailures;
     procedure TestDifferentFileNames;
     procedure TestBuiltInScripts;
+    procedure TestResourceScripts;
   private
     Conn: TSQLite3Connection;
     Query: TSQLQuery;
@@ -167,6 +168,20 @@ begin
 
   // Check possible errors
   AssertException(EDBVersioningException, @UpgradeToIncorrectVersion);
+end;
+
+procedure TTestCase1.TestResourceScripts;
+begin
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.CreateFromResources(Conn, Trans{, 'SQL_SCRIPT_'});
+
+  AssertEquals(4, DBVer.LatestVersion);
+
+  DBVer.UpgradeToLatest;
+  AssertFalse(DBVer.UpgradeNeeded);
+  AssertEquals(2, DBHlp.TablesCount);
+  AssertEquals(4, DBHlp.RowsCount('managers'));
+  AssertEquals(2, DBHlp.RowsCount('customers'));
 end;
 
 procedure TTestCase1.UpgradeToIncorrectVersion;

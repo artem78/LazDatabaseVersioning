@@ -35,6 +35,8 @@ type
         ASQLDir: String = '');
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         const ASQLScripts: array of String);
+      constructor CreateFromResources(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+        AResourcePrefix: String = 'SQL_SCRIPT_');
       destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
@@ -83,13 +85,73 @@ type
       function SQLCommands(AVer: Integer): String; override;
   end;
 
+  { TDBResourceUpgradeProvider }
+
+  TDBResourceUpgradeProvider = class(TDBUpgradeProvider)
+    private
+      ResourcePrefix: String;
+
+    public
+      constructor Create(AResourcePrefix: String {= 'SQL_SCRIPT_'});
+
+      function LatestVersion: Integer; override;
+      function SQLCommands(AVer: Integer): String; override;
+  end;
+
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math, RegExpr;
+  FileUtil, LazFileUtils, Math, RegExpr
+  {$IfDef Windows}
+  , Windows
+  {$EndIf}
+  ;
 
 const
   DBInfoTable = '_db_info';
+
+{ TDBResourceUpgradeProvider }
+
+constructor TDBResourceUpgradeProvider.Create(AResourcePrefix: String);
+begin
+  ResourcePrefix := AResourcePrefix;
+end;
+
+function TDBResourceUpgradeProvider.LatestVersion: Integer;
+var
+  Idx: Integer = 1;
+  ResName: String;
+begin
+  while True do
+  begin
+    ResName := ResourcePrefix + IntToStr(Idx);
+    if FindResource(HINSTANCE, PChar(ResName), RT_RCDATA) = 0 then
+      Exit(Idx - 1);
+
+    Inc(Idx);
+  end;
+end;
+
+function TDBResourceUpgradeProvider.SQLCommands(AVer: Integer): String;
+var
+  ResName: String = '';
+  ResStream: TResourceStream = Nil;
+  StringStream: TStringStream = Nil;
+begin
+  ResName := ResourcePrefix + IntToStr(AVer);
+  if FindResource(HINSTANCE, PChar(ResName), RT_RCDATA) <> 0 then
+  begin
+    ResStream := TResourceStream.Create(HINSTANCE, ResName, RT_RCDATA);
+    StringStream := TStringStream.Create;
+    try
+      StringStream.LoadFromStream(ResStream);
+      Result := StringStream.DataString;
+    finally
+      StringStream.Free;
+      ResStream.Free;
+    end;
+  end;
+end;
 
 { TDBArrayUpgradeProvider }
 
@@ -233,6 +295,18 @@ begin
   CreateDBInfoTable;
 
   Provider := TDBArrayUpgradeProvider.Create(ASQLScripts);
+end;
+
+constructor TDBVersioning.CreateFromResources(AConnection: TSQLConnection;
+  ATransaction: TSQLTransaction; AResourcePrefix: String);
+begin
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
+
+  CreateDBInfoTable;
+
+  Provider := TDBResourceUpgradeProvider.Create(AResourcePrefix);
 end;
 
 destructor TDBVersioning.Destroy;

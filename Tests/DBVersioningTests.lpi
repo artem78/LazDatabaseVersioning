@@ -12,6 +12,12 @@
       <ResourceType Value="res"/>
       <UseXPManifest Value="True"/>
       <Icon Value="0"/>
+      <Resources Count="4">
+        <Resource_0 FileName="db-updates\test03\1.SQL" Type="RCDATA" ResourceName="SQL_SCRIPT_1"/>
+        <Resource_1 FileName="db-updates\test03\0002_create_managers_table.sql" Type="RCDATA" ResourceName="SQL_SCRIPT_2"/>
+        <Resource_2 FileName="db-updates\test03\0003_add_column.sql" Type="RCDATA" ResourceName="SQL_SCRIPT_3"/>
+        <Resource_3 FileName="db-updates\test03\4-insert-some-data.SqL" Type="RCDATA" ResourceName="SQL_SCRIPT_4"/>
+      </Resources>
     </General>
     <BuildModes Count="1">
       <Item1 Name="Default" Default="True"/>
