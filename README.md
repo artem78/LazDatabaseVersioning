@@ -6,6 +6,12 @@ This will help you to auto upgrade database scheme.
 
 - Sqlite only (not tested with other databases)
 
+## How to use and examples
+
+*coming soon...*
+
+See [test cases](/Tests/testcase1.pas).
+
 ## Documentation
 
 Go to https://artem78.github.io/LazDatabaseVersioning/
