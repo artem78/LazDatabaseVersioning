@@ -9,12 +9,15 @@ uses
 
 type
 
+  TDBUpgradeProvider = class;
+
   { TDBVersioning }
 
   TDBVersioning = class
     //private
     protected
       SQLQuery: TSQLQuery;
+      Provider: TDBUpgradeProvider;
 
       procedure CreateDBInfoTable;
 
@@ -27,13 +30,11 @@ type
 
       function GetLatestVersion: Integer;
 
-      function DefaultSQLDir: String;
-
     public
-      SQLDir: String;
-
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         ASQLDir: String = '');
+      constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+        const ASQLScripts: array of String);
       destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
@@ -42,6 +43,44 @@ type
       procedure UpgradeTo(AVer: Integer);
       procedure UpgradeToLatest;
       function UpgradeNeeded: Boolean;
+      function IsInitialized: Boolean;
+  end;
+
+  EDBVersioningException = class(Exception);
+
+  TDBUpgradeProvider = class
+    public
+      function LatestVersion: Integer; virtual; abstract;
+      function SQLCommands(AVer: Integer): String; virtual; abstract;
+  end;
+
+  { TDBFileUpgradeProvider }
+
+  TDBFileUpgradeProvider = class(TDBUpgradeProvider)
+    private
+      SQLDir: String;
+
+      function DefaultSQLDir: String;
+
+    public
+      constructor Create(ASQLDir: String = '');
+
+      function LatestVersion: Integer; override;
+      function SQLCommands(AVer: Integer): String; override;
+  end;
+
+  { TDBArrayUpgradeProvider }
+
+  TDBArrayUpgradeProvider = class(TDBUpgradeProvider)
+    private
+      SQLScripts: array of String;
+
+    public
+      constructor Create(const ASQLScripts: array of String);
+      destructor Destroy; override;
+
+      function LatestVersion: Integer; override;
+      function SQLCommands(AVer: Integer): String; override;
   end;
 
 implementation
@@ -52,30 +91,82 @@ uses
 const
   DBInfoTable = '_db_info';
 
-{ TDBVersioning }
+{ TDBArrayUpgradeProvider }
 
-constructor TDBVersioning.Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
-  ASQLDir: String);
+constructor TDBArrayUpgradeProvider.Create(const ASQLScripts: array of String);
+var
+  I: Integer;
 begin
-  SQLQuery := TSQLQuery.Create(Nil);
-  SQLQuery.SQLConnection := AConnection;
-  SQLQuery.Transaction := ATransaction;
+  // ToDo: optimize, remake without array copying
+  SetLength(SQlScripts, Length(ASQLScripts));
+  for I := Low(ASQLScripts) to High(ASQLScripts) do
+    SQlScripts[I] := ASQLScripts[I];
+end;
 
-  CreateDBInfoTable;
+destructor TDBArrayUpgradeProvider.Destroy;
+begin
+   SetLength(SQLScripts, 0);
+end;
 
+function TDBArrayUpgradeProvider.LatestVersion: Integer;
+begin
+  Result := High(SQLScripts) + 1;
+end;
+
+function TDBArrayUpgradeProvider.SQLCommands(AVer: Integer): String;
+var
+  Idx: Integer;
+begin
+  Idx := AVer - 1;
+  if (Idx < Low(SQLScripts)) or (Idx > High(SQLScripts)) then
+    raise EDBVersioningException.CreateFmt('Unable to find SQL script for version %d', [AVer]);
+
+  Result := SQLScripts[Idx];
+end;
+
+{ TDBFileUpgradeProvider }
+
+function TDBFileUpgradeProvider.DefaultSQLDir: String;
+begin
+  Result := ConcatPaths([ExtractFileDir({Application.ExeName} ParamStr(0)), 'db-updates', '']);
+end;
+
+constructor TDBFileUpgradeProvider.Create(ASQLDir: String);
+begin
   SQLDir := ASQLDir;
   if SQLDir = '' then
     SQLDir := DefaultSQLDir;
 end;
 
-destructor TDBVersioning.Destroy;
+function TDBFileUpgradeProvider.LatestVersion: Integer;
+var
+  FileList: TStringList;
+  FileName: String;
+  I, Version: Integer;
+  Re: TRegExpr;
 begin
-  SQLQuery.Free;
-
-  inherited;
+  Result := 0;
+  FileList := FindAllFiles(SQLDir, '*.sql', False);
+  Re := TRegExpr.Create('^(\d+)');
+  try
+    for I := 0 to FileList.Count - 1 do
+    begin
+      FileName := ExtractFileName(FileList[I]);
+      try
+        if Re.Exec(FileName) then
+          Version := StrToInt(Re.Match[1]);
+        Result := Max(Result, Version);
+      except
+        // Skip SQL-files without leading number
+      end;
+    end;
+  finally
+    FileList.Free;
+    Re.Free;
+  end;
 end;
 
-procedure TDBVersioning.UpgradeTo(AVer: Integer);
+function TDBFileUpgradeProvider.SQLCommands(AVer: Integer): String;
   function FindSQLFileForVersion(AVer: Integer): String;
   var
     FileList: TStringList;
@@ -101,15 +192,65 @@ procedure TDBVersioning.UpgradeTo(AVer: Integer);
   end;
 
 var
-  Ver, OldVer: Integer;
   SqlFileName: String;
-  SQLScript: TSQLScript;
   Tmp: TStringList;
+begin
+  Result := '';
+  Tmp := TStringList.Create;
+  try
+    SqlFileName := FindSQLFileForVersion(AVer);
+    if SqlFileName.IsEmpty then
+      raise {EFileNotFoundException}EDBVersioningException.CreateFmt('Unable to find SQL script file for version %d', [AVer]);
+
+    Tmp.LoadFromFile(SqlFileName);
+    Result := Tmp.Text;
+  finally
+    Tmp.Free;
+  end;
+end;
+
+{ TDBVersioning }
+
+constructor TDBVersioning.Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+  ASQLDir: String);
+begin
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
+
+  CreateDBInfoTable;
+
+  Provider := TDBFileUpgradeProvider.Create(ASQLDir);
+end;
+
+constructor TDBVersioning.Create(AConnection: TSQLConnection;
+  ATransaction: TSQLTransaction; const ASQLScripts: array of String);
+begin
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
+
+  CreateDBInfoTable;
+
+  Provider := TDBArrayUpgradeProvider.Create(ASQLScripts);
+end;
+
+destructor TDBVersioning.Destroy;
+begin
+  Provider.Free;
+  SQLQuery.Free;
+
+  inherited;
+end;
+
+procedure TDBVersioning.UpgradeTo(AVer: Integer);
+var
+  Ver, OldVer: Integer;
+  SQLScript: TSQLScript;
 begin
   if {not UpgradeNeeded} CurrentVersion = AVer then
     Exit;
 
-  Tmp := TStringList.Create;
   SQLScript := TSQLScript.Create(Nil);
   try
     try
@@ -118,10 +259,7 @@ begin
 
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
-        SqlFileName := FindSQLFileForVersion(Ver);
-
-        Tmp.LoadFromFile(SqlFileName);
-        SQLScript.Script.AddStrings(Tmp);
+        SQLScript.Script.{AddStrings}AddText(Provider.SQLCommands(Ver));
       end;
 
       SQLScript.Execute;
@@ -131,7 +269,6 @@ begin
     end;
   finally
     SQLScript.Free;
-    Tmp.Free;
   end;
 
   (SQLQuery.Transaction as TSQLTransaction).CommitRetaining;
@@ -150,6 +287,11 @@ end;
 function TDBVersioning.UpgradeNeeded: Boolean;
 begin
   Result := GetCurrentDBVersion < GetLatestVersion;
+end;
+
+function TDBVersioning.IsInitialized: Boolean;
+begin
+  Result := CurrentVersion > 0;
 end;
 
 procedure TDBVersioning.CreateDBInfoTable;
@@ -235,36 +377,8 @@ begin
 end;
 
 function TDBVersioning.GetLatestVersion: Integer;
-var
-  FileList: TStringList;
-  FileName: String;
-  I, Version: Integer;
-  Re: TRegExpr;
 begin
-  Result := 0;
-  FileList := FindAllFiles(SQLDir, '*.sql', False);
-  Re := TRegExpr.Create('^(\d+)');
-  try
-    for I := 0 to FileList.Count - 1 do
-    begin
-      FileName := ExtractFileName(FileList[I]);
-      try
-        if Re.Exec(FileName) then
-          Version := StrToInt(Re.Match[1]);
-        Result := Max(Result, Version);
-      except
-        // Skip SQL-files without leading number
-      end;
-    end;
-  finally
-    FileList.Free;
-    Re.Free;
-  end;
-end;
-
-function TDBVersioning.DefaultSQLDir: String;
-begin
-  Result := ConcatPaths([ExtractFileDir({Application.ExeName} ParamStr(0)), 'db-updates', '']);
+  Result := Provider.LatestVersion;
 end;
 
 end.

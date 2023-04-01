@@ -8,6 +8,9 @@ uses
   Classes, SysUtils, fpcunit, {testutils,} testregistry, SQLDB, SQLite3Conn,
   Helper;
 
+const
+  SQLScriptsBaseDir = 'db-updates';
+
 type
 
   { TTestCase1 }
@@ -21,29 +24,35 @@ type
     procedure TestDatabaseUpgrade;
     procedure TestDatabaseUpgradeFailures;
     procedure TestDifferentFileNames;
+    procedure TestBuiltInScripts;
   private
     Conn: TSQLite3Connection;
     Query: TSQLQuery;
     Trans: TSQLTransaction;
     DBHlp: TDBHelper;
     DBVer: TDBVersioningHelper;
+
+    procedure UpgradeToIncorrectVersion;
   end;
 
 implementation
 
 uses
-  Forms;
+  Forms, DatabaseVersioning;
 
 procedure TTestCase1.TestDatabaseUpgrade;
 var
   Num: Integer;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test01']);
+  //DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test01']);
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, ConcatPaths([SQLScriptsBaseDir, 'test01']));
 
 
   AssertEquals(0, DBVer.GetCurrentDBVersion);
   AssertEquals(0, DBHlp.TablesCount);
   AssertTrue(DBVer.UpgradeNeeded);
+  AssertFalse(DBVer.IsInitialized);
 
   DBVer.UpgradeTo(5); // --> 5
   AssertEquals(5, DBVer.GetCurrentDBVersion);
@@ -56,6 +65,7 @@ begin
   AssertTrue(DBHlp.TableExists('t2'));
   AssertEquals(3, DBHlp.ColumnsCount('t2'));
   AssertTrue(DBVer.UpgradeNeeded);
+  AssertTrue(DBVer.IsInitialized);
 
   DBVer.UpgradeTo(6); // 5 --> 6
   AssertEquals(6, DBVer.GetCurrentDBVersion);
@@ -72,6 +82,7 @@ begin
   AssertEquals(3 + 1, DBHlp.RowsCount('t1'));
   AssertEquals(2, DBHlp.RowsCount('t2'));
   AssertFalse(DBVer.UpgradeNeeded);
+  AssertTrue(DBVer.IsInitialized);
 
   with Query do
   begin
@@ -98,7 +109,9 @@ end;
 
 procedure TTestCase1.TestDatabaseUpgradeFailures;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test02']);
+  //DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test02']);
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, ConcatPaths([SQLScriptsBaseDir, 'test02']));
 
   DBVer.UpgradeTo(1); // 0 --> 1
   AssertTrue(DBHlp.TableExists('t0'));
@@ -111,11 +124,16 @@ begin
   AssertFalse(DBHlp.TableExists('t3'));
   AssertEquals(1, DBHlp.TablesCount);
   AssertEquals(1, DBVer.CurrentVersion);
+
+  // Try to upgrade to non-existent version
+  AssertException(EDBVersioningException, @UpgradeToIncorrectVersion);
 end;
 
 procedure TTestCase1.TestDifferentFileNames;
 begin
-  DBVer.SQLDir := ConcatPaths(['db-updates', 'test03']);
+  //DBVer.SQLDir := ConcatPaths([SQLScriptsBaseDir, 'test03']);
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, ConcatPaths([SQLScriptsBaseDir, 'test03']));
 
   DBVer.UpgradeToLatest;
 
@@ -123,6 +141,37 @@ begin
   AssertEquals(4, DBHlp.RowsCount('managers'));
   AssertEquals(2, DBHlp.RowsCount('customers'));
   AssertTrue(DBHlp.ColumnExists('managers', 'salary'));
+end;
+
+procedure TTestCase1.TestBuiltInScripts;
+const
+  SQLScripts: array [1..4] of string = (
+    'CREATE TABLE `t` (`id` INTEGER PRIMARY KEY, `first_name` STRING);',
+    'ALTER TABLE `t` RENAME TO `persons`;',
+    'ALTER TABLE `persons` ADD COLUMN `last_name` STRING;',
+    'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("John", "Doe");' + sLineBreak +
+        'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Mary", "Smith");' + sLineBreak +
+        'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Samanta", "Brown");'
+  );
+begin
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, SQLScripts);
+
+  AssertEquals(4, DBVer.LatestVersion);
+  AssertTrue(DBVer.UpgradeNeeded);
+  DBVer.UpgradeToLatest;
+  AssertEquals(4, DBVer.GetCurrentDBVersion);
+  AssertFalse(DBVer.UpgradeNeeded);
+  AssertTrue(DBHlp.TableExists('persons'));
+  AssertEquals(3, DBHlp.RowsCount('persons'));
+
+  // Check possible errors
+  AssertException(EDBVersioningException, @UpgradeToIncorrectVersion);
+end;
+
+procedure TTestCase1.UpgradeToIncorrectVersion;
+begin
+  DBVer.UpgradeTo(9999);
 end;
 
 procedure TTestCase1.TestParams;

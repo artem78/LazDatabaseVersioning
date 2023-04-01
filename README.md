@@ -18,6 +18,6 @@ Go to https://artem78.github.io/LazDatabaseVersioning/
 
 ## ToDos
 - [ ] Write description and usage instructions
-- [ ] Allow to place SQL commands in code in addition to use separate files
+- [x] Allow to place SQL commands in code in addition to use separate files
 - [x] Use transactions for each db upgrade, check if upgrade finished succesfully
 - [ ] Rollback upgrades (downgrade DB)
