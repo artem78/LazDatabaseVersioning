@@ -267,6 +267,8 @@ var
   SqliteDBFile: String {$IFDEF IN_MEMORY}= ':memory:'{$EndIf};
   Ini: TIniFile;
 begin
+  // ToDo: Use MEMORY storage engine for testing MySql
+
   {$IFNDEF IN_MEMORY}
   if Engine = dbSqlite3 then
   begin
