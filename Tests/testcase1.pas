@@ -264,9 +264,10 @@ end;
 
 procedure TTestCase1.SetUp;
 var
-  SqliteDBFile: String;
+  SqliteDBFile: String {$IFDEF IN_MEMORY}= ':memory:'{$EndIf};
   Ini: TIniFile;
 begin
+  {$IFNDEF IN_MEMORY}
   if Engine = dbSqlite3 then
   begin
     // Drop exists database file
@@ -274,6 +275,7 @@ begin
     if FileExists(SqliteDBFile) then
       DeleteFile(SqliteDBFile);
   end;
+  {$EndIf}
 
   // Prepare database
   Trans := TSQLTransaction.Create(Nil);

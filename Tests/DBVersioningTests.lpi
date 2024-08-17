@@ -83,6 +83,9 @@
         </Win32>
       </Options>
     </Linking>
+    <Other>
+      <CustomOptions Value="-dIN_MEMORY"/>
+    </Other>
   </CompilerOptions>
   <Debugging>
     <Exceptions Count="7">
