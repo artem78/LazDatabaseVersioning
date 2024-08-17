@@ -5,7 +5,7 @@ unit TestCase1;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, {testutils,} testregistry, SQLDB, SQLite3Conn,
+  Classes, SysUtils, fpcunit, testregistry, SQLDB, mysql55conn, SQLite3Conn,
   Helper;
 
 const
@@ -13,10 +13,14 @@ const
 
 type
 
+  TDBEngine = (dbSqlite3=1, dbMysql55);
+
   { TTestCase1 }
 
   TTestCase1= class(TTestCase)
   protected
+    Engine: TDBEngine;
+
     procedure SetUp; override;
     procedure TearDown; override;
   published
@@ -27,7 +31,7 @@ type
     procedure TestBuiltInScripts;
     procedure TestResourceScripts;
   private
-    Conn: TSQLite3Connection;
+    Conn: TSQLConnection;
     Query: TSQLQuery;
     Trans: TSQLTransaction;
     DBHlp: TDBHelper;
@@ -36,10 +40,42 @@ type
     procedure UpgradeToIncorrectVersion;
   end;
 
+  { TSqlite3Test }
+
+  TSqlite3Test = class(TTestCase1)
+  public
+    constructor Create; override;
+  end;
+
+  { TMysql55Test }
+
+  TMysql55Test = class(TTestCase1)
+  public
+    constructor Create; override;
+  end;
+
 implementation
 
 uses
-  Forms, DatabaseVersioning;
+  Forms, FileUtil, DatabaseVersioning, IniFiles;
+
+{ TSqlite3Test }
+
+constructor TSqlite3Test.Create;
+begin
+  Engine:=dbSqlite3;
+
+  inherited Create;
+end;
+
+{ TMysql55Test }
+
+constructor TMysql55Test.Create;
+begin
+  Engine:=dbMysql55;
+
+  inherited Create;
+end;
 
 procedure TTestCase1.TestDatabaseUpgrade;
 var
@@ -147,9 +183,9 @@ end;
 procedure TTestCase1.TestBuiltInScripts;
 const
   SQLScripts: array [1..4] of string = (
-    'CREATE TABLE `t` (`id` INTEGER PRIMARY KEY, `first_name` STRING);',
+    'CREATE TABLE `t` (`id` INTEGER PRIMARY KEY /*! AUTO_INCREMENT */, `first_name` VARCHAR(128));',
     'ALTER TABLE `t` RENAME TO `persons`;',
-    'ALTER TABLE `persons` ADD COLUMN `last_name` STRING;',
+    'ALTER TABLE `persons` ADD COLUMN `last_name` VARCHAR(128);',
     'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("John", "Doe");' + sLineBreak +
         'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Mary", "Smith");' + sLineBreak +
         'INSERT INTO `persons` (`first_name`, `last_name`) VALUES ("Samanta", "Brown");'
@@ -228,33 +264,67 @@ end;
 
 procedure TTestCase1.SetUp;
 var
-  DBFile: String;
+  SqliteDBFile: String;
+  Ini: TIniFile;
 begin
-  // Drop exists database file
-  DBFile := IncludeTrailingPathDelimiter(ExtractFileDir(Application.ExeName)) + 'test.db';
-  if FileExists(DBFile) then
-    DeleteFile(DBFile);
+  if Engine = dbSqlite3 then
+  begin
+    // Drop exists database file
+    SqliteDBFile := IncludeTrailingPathDelimiter(ExtractFileDir(Application.ExeName)) + 'test.db';
+    if FileExists(SqliteDBFile) then
+      DeleteFile(SqliteDBFile);
+  end;
 
   // Prepare database
   Trans := TSQLTransaction.Create(Nil);
   //Trans.DataBase := ;
 
-  Conn := TSQLite3Connection.Create(Nil);
-  Conn.DatabaseName := DBFile;
-  Conn.CharSet := 'UTF8';
-  Conn.Transaction := Trans;
-  Conn.Open;
+  case Engine of
+    dbSqlite3:
+      begin
+        Conn := TSQLite3Connection.Create(Nil);
+        Conn.DatabaseName := SqliteDBFile;
+        Conn.CharSet := 'UTF8';
+        Conn.Transaction := Trans;
+        Conn.Open;
+      end;
+
+    dbMysql55:
+      begin
+        if not FileExists('db-config.ini') then
+          CopyFile('db-config.sample.ini', 'db-config.ini');
+
+        Ini := TIniFile.Create('db-config.ini');
+        try
+          Conn := TMySQL55Connection.Create(Nil);
+          Conn.DatabaseName := Ini.ReadString('mysql', 'DatabaseName', '');
+          Conn.HostName := Ini.ReadString('mysql', 'HostName', '');
+          (Conn as TMySQL55Connection).Port := Ini.ReadInteger('mysql', 'Port', 3306);
+          Conn.UserName := Ini.ReadString('mysql', 'UserName', '');
+          Conn.Password := Ini.ReadString('mysql', 'Password', '');
+          Conn.CharSet:='utf8';
+
+          Conn.Transaction := Trans;
+          Conn.Open;
+        finally
+          Ini.Free;
+        end;
+      end;
+  end;
 
   Query := TSQLQuery.Create(Nil);
   Query.SQLConnection := Conn;
 
   Trans.Active := True;
 
-  // Create TDBVersioning instance
-  DBVer := TDBVersioningHelper.Create(Conn, Trans);
-
   // Create helper
   DBHlp := TDBHelper.Create(Conn, Trans);
+
+  if Engine = dbMysql55 then
+    DBHlp.ClearDatabase;
+
+  // Create TDBVersioning instance
+  DBVer := TDBVersioningHelper.Create(Conn, Trans);
 end;
 
 procedure TTestCase1.TearDown;
@@ -268,6 +338,7 @@ end;
 
 initialization
 
-  RegisterTest(TTestCase1);
+  RegisterTest(TSqlite3Test);
+  RegisterTest(TMysql55Test);
 end.
 

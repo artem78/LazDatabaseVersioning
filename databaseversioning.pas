@@ -30,6 +30,9 @@ type
 
       function GetLatestVersion: Integer;
 
+      function IsSqlite: Boolean;
+      function IsMysql: Boolean;
+
     public
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         ASQLDir: String = '');
@@ -46,6 +49,9 @@ type
       procedure UpgradeToLatest;
       function UpgradeNeeded: Boolean;
       function IsInitialized: Boolean;
+
+      //function IsSqlite: Boolean;
+      //function IsMysql: Boolean;
   end;
 
   EDBVersioningException = class(Exception);
@@ -101,7 +107,7 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math, RegExpr
+  FileUtil, LazFileUtils, Math, RegExpr, StrUtils
   {$IfDef Windows}
   , Windows
   {$EndIf}
@@ -373,11 +379,19 @@ begin
   with SQLQuery do
   begin
     Close;
-    SQL.Text :=
-      'CREATE TABLE IF NOT EXISTS `' + DBInfoTable + '` (' +
-        '`key` TEXT PRIMARY KEY,' +
-        '`value` TEXT' +
-      ')';
+    SQL.Clear;
+    SQL.Append('CREATE TABLE IF NOT EXISTS `' + DBInfoTable + '` (');
+    if IsSqlite then
+    begin
+      SQL.Append('`key` TEXT PRIMARY KEY,');
+      SQL.Append('`value` TEXT');
+    end
+    else if IsMysql then
+    begin
+      SQL.Append('`key` VARCHAR(32) PRIMARY KEY,');
+      SQL.Append('`value` VARCHAR(512)');
+    end;
+    SQL.Append(')');
     ExecSQL;
     Close;
 
@@ -422,9 +436,11 @@ begin
   with SQLQuery do
   begin
     Close;
-    SQL.Text :=
-      'INSERT OR REPLACE INTO `' + DBInfoTable + '` (`key`, `value`) ' +
-        'VALUES (:key, :value)';
+    SQL.Clear;
+    if IsSqlite then
+      SQL.Append('INSERT OR ');
+    SQL.Append('REPLACE INTO `' + DBInfoTable + '` (`key`, `value`)');
+    SQL.Append('VALUES (:key, :value)');
     ParamByName('key').AsString := AParam;
     ParamByName('value').AsString := AValue;
     ExecSQL;
@@ -453,6 +469,16 @@ end;
 function TDBVersioning.GetLatestVersion: Integer;
 begin
   Result := Provider.LatestVersion;
+end;
+
+function TDBVersioning.IsSqlite: Boolean;
+begin
+  Result := StartsText('TSqlite', SQLQuery.SQLConnection.ClassName);
+end;
+
+function TDBVersioning.IsMysql: Boolean;
+begin
+  Result := StartsText('TMysql', SQLQuery.SQLConnection.ClassName);
 end;
 
 end.
