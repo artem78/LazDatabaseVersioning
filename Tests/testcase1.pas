@@ -5,7 +5,7 @@ unit TestCase1;
 interface
 
 uses
-  Classes, SysUtils, fpcunit, testregistry, SQLDB, mysql55conn, SQLite3Conn,
+  Classes, SysUtils, fpcunit, testregistry, SQLDB, mysql57conn, SQLite3Conn,
   Helper;
 
 const
@@ -13,7 +13,7 @@ const
 
 type
 
-  TDBEngine = (dbSqlite3=1, dbMysql55);
+  TDBEngine = (dbSqlite3=1, dbMysql57);
 
   { TTestCase1 }
 
@@ -47,9 +47,9 @@ type
     constructor Create; override;
   end;
 
-  { TMysql55Test }
+  { TMysql57Test }
 
-  TMysql55Test = class(TTestCase1)
+  TMysql57Test = class(TTestCase1)
   public
     constructor Create; override;
   end;
@@ -68,11 +68,11 @@ begin
   inherited Create;
 end;
 
-{ TMysql55Test }
+{ TMysql57Test }
 
-constructor TMysql55Test.Create;
+constructor TMysql57Test.Create;
 begin
-  Engine:=dbMysql55;
+  Engine:=dbMysql57;
 
   inherited Create;
 end;
@@ -293,17 +293,17 @@ begin
         Conn.Open;
       end;
 
-    dbMysql55:
+    dbMysql57:
       begin
         if not FileExists('db-config.ini') then
           CopyFile('db-config.sample.ini', 'db-config.ini');
 
         Ini := TIniFile.Create('db-config.ini');
         try
-          Conn := TMySQL55Connection.Create(Nil);
+          Conn := TMySQL57Connection.Create(Nil);
           Conn.DatabaseName := Ini.ReadString('mysql', 'DatabaseName', '');
           Conn.HostName := Ini.ReadString('mysql', 'HostName', '');
-          (Conn as TMySQL55Connection).Port := Ini.ReadInteger('mysql', 'Port', 3306);
+          (Conn as TMySQL57Connection).Port := Ini.ReadInteger('mysql', 'Port', 3306);
           Conn.UserName := Ini.ReadString('mysql', 'UserName', '');
           Conn.Password := Ini.ReadString('mysql', 'Password', '');
           Conn.CharSet:='utf8';
@@ -324,7 +324,7 @@ begin
   // Create helper
   DBHlp := TDBHelper.Create(Conn, Trans);
 
-  if Engine = dbMysql55 then
+  if Engine = dbMysql57 then
     DBHlp.ClearDatabase;
 
   // Create TDBVersioning instance
@@ -343,6 +343,6 @@ end;
 initialization
 
   RegisterTest(TSqlite3Test);
-  RegisterTest(TMysql55Test);
+  RegisterTest(TMysql57Test);
 end.
 
