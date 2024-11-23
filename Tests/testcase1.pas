@@ -55,10 +55,39 @@ type
     constructor Create; override;
   end;
 
+  { TUtilsTest }
+
+  TUtilsTest = class(TTestCase)
+  published
+    procedure TestAddTrailingSemicolon;
+  end;
+
 implementation
 
 uses
-  Forms, FileUtil, DatabaseVersioning, IniFiles;
+  Forms, FileUtil, DatabaseVersioning, Utils, IniFiles, StrUtils;
+
+{ TUtilsTest }
+
+procedure TUtilsTest.TestAddTrailingSemicolon;
+  procedure Test(const ASQL: String);
+  begin
+    AssertEquals('select * from tbl;', AddTrailingSemicolon(ASQL));
+  end;
+
+begin
+  // Trailing semicolon is missed
+  Test('select * from tbl');
+  Test('select * from tbl   ' + LineEnding + #9 {tab});
+
+  // Trailing semicolon exists
+  Test('select * from tbl;');
+  Test('select * from tbl;  ' + LineEnding + #9 {tab});
+
+  // Empty string
+  AssertFalse(ContainsStr(AddTrailingSemicolon('  ' + LineEnding + #9 {tab}), ';'))
+
+end;
 
 { TSqlite3Test }
 
@@ -362,6 +391,7 @@ end;
 
 initialization
 
+  RegisterTest(TUtilsTest);
   RegisterTest(TSqlite3Test);
   RegisterTest(TMysql55Test);
 end.

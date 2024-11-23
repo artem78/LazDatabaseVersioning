@@ -40,7 +40,7 @@
         <PackageName Value="FCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="4">
+    <Units Count="5">
       <Unit0>
         <Filename Value="DBVersioningTests.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -60,6 +60,11 @@
         <IsPartOfProject Value="True"/>
         <UnitName Value="Helper"/>
       </Unit3>
+      <Unit4>
+        <Filename Value="..\utils.pas"/>
+        <IsPartOfProject Value="True"/>
+        <UnitName Value="Utils"/>
+      </Unit4>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
