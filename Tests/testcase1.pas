@@ -30,6 +30,7 @@ type
     procedure TestDifferentFileNames;
     procedure TestBuiltInScripts;
     procedure TestResourceScripts;
+    procedure TestMissedSemicolons;
   private
     Conn: TSQLConnection;
     Query: TSQLQuery;
@@ -218,6 +219,25 @@ begin
   AssertEquals(2, DBHlp.TablesCount);
   AssertEquals(4, DBHlp.RowsCount('managers'));
   AssertEquals(2, DBHlp.RowsCount('customers'));
+end;
+
+procedure TTestCase1.TestMissedSemicolons;
+const
+  TableName = 'tbl';
+begin
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, ConcatPaths([SQLScriptsBaseDir, 'test04']));
+
+  DBVer.UpgradeTo(1); // 0 --> 1
+  DBVer.UpgradeToLatest; // 1 --> 4;
+  AssertFalse(DBVer.UpgradeNeeded);
+  AssertEquals(4, DBVer.CurrentVersion);
+  AssertEquals(5, DBHlp.ColumnsCount(TableName));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'id'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'Email'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'FirstName'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'LastName'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'DOB'));
 end;
 
 procedure TTestCase1.UpgradeToIncorrectVersion;
