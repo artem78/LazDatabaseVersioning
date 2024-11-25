@@ -107,7 +107,7 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math, RegExpr, StrUtils, utils
+  FileUtil, LazFileUtils, RegExpr, StrUtils, utils
   {$IfDef Windows}
   , Windows
   {$EndIf}
