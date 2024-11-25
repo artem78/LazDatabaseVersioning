@@ -61,9 +61,9 @@
         <UnitName Value="Helper"/>
       </Unit3>
       <Unit4>
-        <Filename Value="..\utils.pas"/>
+        <Filename Value="dbverutils.pas"/>
         <IsPartOfProject Value="True"/>
-        <UnitName Value="Utils"/>
+        <UnitName Value="DBVerUtils"/>
       </Unit4>
     </Units>
   </ProjectOptions>

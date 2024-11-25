@@ -65,7 +65,7 @@ type
 implementation
 
 uses
-  Forms, FileUtil, DatabaseVersioning, Utils, IniFiles, StrUtils;
+  Forms, FileUtil, DatabaseVersioning, DBVerUtils, IniFiles, StrUtils;
 
 { TUtilsTest }
 
