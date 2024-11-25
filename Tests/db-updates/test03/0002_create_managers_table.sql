@@ -1,5 +1,5 @@
 CREATE TABLE managers (
     `id` INTEGER,
-    `name` STRING,
+    `name` VARCHAR(255),
     `age` INTEGER
 );

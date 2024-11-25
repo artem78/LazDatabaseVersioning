@@ -1,5 +1,5 @@
 CREATE TABLE t2 (
     id   INTEGER PRIMARY KEY,
-    a  STRING,
-    b  STRING
+    a  VARCHAR(128),
+    b  VARCHAR(128)
 );

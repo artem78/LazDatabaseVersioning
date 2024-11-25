@@ -21,3 +21,4 @@ Go to https://artem78.github.io/LazDatabaseVersioning/
 - [x] Allow to place SQL commands in code in addition to use separate files
 - [x] Use transactions for each db upgrade, check if upgrade finished succesfully
 - [ ] Rollback upgrades (downgrade DB)
+- [ ] Use docker container with mysql for testing

@@ -30,11 +30,16 @@ type
 
       function GetLatestVersion: Integer;
 
+      function IsSqlite: Boolean;
+      function IsMysql: Boolean;
+
     public
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         ASQLDir: String = '');
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         const ASQLScripts: array of String);
+      constructor CreateFromResources(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
+        AResourcePrefix: String = 'SQL_SCRIPT_');
       destructor Destroy; override;
 
       property CurrentVersion: Integer read GetCurrentDBVersion;
@@ -44,6 +49,9 @@ type
       procedure UpgradeToLatest;
       function UpgradeNeeded: Boolean;
       function IsInitialized: Boolean;
+
+      //function IsSqlite: Boolean;
+      //function IsMysql: Boolean;
   end;
 
   EDBVersioningException = class(Exception);
@@ -83,13 +91,73 @@ type
       function SQLCommands(AVer: Integer): String; override;
   end;
 
+  { TDBResourceUpgradeProvider }
+
+  TDBResourceUpgradeProvider = class(TDBUpgradeProvider)
+    private
+      ResourcePrefix: String;
+
+    public
+      constructor Create(AResourcePrefix: String {= 'SQL_SCRIPT_'});
+
+      function LatestVersion: Integer; override;
+      function SQLCommands(AVer: Integer): String; override;
+  end;
+
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math, RegExpr;
+  FileUtil, LazFileUtils, RegExpr, StrUtils, utils
+  {$IfDef Windows}
+  , Windows
+  {$EndIf}
+  ;
 
 const
   DBInfoTable = '_db_info';
+
+{ TDBResourceUpgradeProvider }
+
+constructor TDBResourceUpgradeProvider.Create(AResourcePrefix: String);
+begin
+  ResourcePrefix := AResourcePrefix;
+end;
+
+function TDBResourceUpgradeProvider.LatestVersion: Integer;
+var
+  Idx: Integer = 1;
+  ResName: String;
+begin
+  while True do
+  begin
+    ResName := ResourcePrefix + IntToStr(Idx);
+    if FindResource(HINSTANCE, PChar(ResName), RT_RCDATA) = 0 then
+      Exit(Idx - 1);
+
+    Inc(Idx);
+  end;
+end;
+
+function TDBResourceUpgradeProvider.SQLCommands(AVer: Integer): String;
+var
+  ResName: String = '';
+  ResStream: TResourceStream = Nil;
+  StringStream: TStringStream = Nil;
+begin
+  ResName := ResourcePrefix + IntToStr(AVer);
+  if FindResource(HINSTANCE, PChar(ResName), RT_RCDATA) <> 0 then
+  begin
+    ResStream := TResourceStream.Create(HINSTANCE, ResName, RT_RCDATA);
+    StringStream := TStringStream.Create;
+    try
+      StringStream.LoadFromStream(ResStream);
+      Result := StringStream.DataString;
+    finally
+      StringStream.Free;
+      ResStream.Free;
+    end;
+  end;
+end;
 
 { TDBArrayUpgradeProvider }
 
@@ -235,6 +303,18 @@ begin
   Provider := TDBArrayUpgradeProvider.Create(ASQLScripts);
 end;
 
+constructor TDBVersioning.CreateFromResources(AConnection: TSQLConnection;
+  ATransaction: TSQLTransaction; AResourcePrefix: String);
+begin
+  SQLQuery := TSQLQuery.Create(Nil);
+  SQLQuery.SQLConnection := AConnection;
+  SQLQuery.Transaction := ATransaction;
+
+  CreateDBInfoTable;
+
+  Provider := TDBResourceUpgradeProvider.Create(AResourcePrefix);
+end;
+
 destructor TDBVersioning.Destroy;
 begin
   Provider.Free;
@@ -248,6 +328,11 @@ var
   Ver, OldVer: Integer;
   SQLScript: TSQLScript;
 begin
+  // Fixme: в Mysql транзакции (точнее ROLLBACK) не работают с командами CREATE TABLE, ALTER TABLE и пр...
+  // см.: https://dev.mysql.com/doc/refman/5.7/en/cannot-roll-back.html
+  // как же тогда сделать откат изменеия схемы бд к предыдущему состоянию в случае ошибки?
+  // И непонятно, почему тогда проходят тесты из TTestCase1.TestDatabaseUpgradeFailures?
+
   if {not UpgradeNeeded} CurrentVersion = AVer then
     Exit;
 
@@ -259,7 +344,7 @@ begin
 
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
-        SQLScript.Script.{AddStrings}AddText(Provider.SQLCommands(Ver));
+        SQLScript.Script.{AddStrings}AddText(AddTrailingSemicolon(Provider.SQLCommands(Ver)));
       end;
 
       SQLScript.Execute;
@@ -299,11 +384,19 @@ begin
   with SQLQuery do
   begin
     Close;
-    SQL.Text :=
-      'CREATE TABLE IF NOT EXISTS `' + DBInfoTable + '` (' +
-        '`key` TEXT PRIMARY KEY,' +
-        '`value` TEXT' +
-      ')';
+    SQL.Clear;
+    SQL.Append('CREATE TABLE IF NOT EXISTS `' + DBInfoTable + '` (');
+    if IsSqlite then
+    begin
+      SQL.Append('`key` TEXT PRIMARY KEY,');
+      SQL.Append('`value` TEXT');
+    end
+    else if IsMysql then
+    begin
+      SQL.Append('`key` VARCHAR(32) PRIMARY KEY,');
+      SQL.Append('`value` VARCHAR(512)');
+    end;
+    SQL.Append(')');
     ExecSQL;
     Close;
 
@@ -348,9 +441,11 @@ begin
   with SQLQuery do
   begin
     Close;
-    SQL.Text :=
-      'INSERT OR REPLACE INTO `' + DBInfoTable + '` (`key`, `value`) ' +
-        'VALUES (:key, :value)';
+    SQL.Clear;
+    if IsSqlite then
+      SQL.Append('INSERT OR ');
+    SQL.Append('REPLACE INTO `' + DBInfoTable + '` (`key`, `value`)');
+    SQL.Append('VALUES (:key, :value)');
     ParamByName('key').AsString := AParam;
     ParamByName('value').AsString := AValue;
     ExecSQL;
@@ -379,6 +474,16 @@ end;
 function TDBVersioning.GetLatestVersion: Integer;
 begin
   Result := Provider.LatestVersion;
+end;
+
+function TDBVersioning.IsSqlite: Boolean;
+begin
+  Result := StartsText('TSqlite', SQLQuery.SQLConnection.ClassName);
+end;
+
+function TDBVersioning.IsMysql: Boolean;
+begin
+  Result := StartsText('TMysql', SQLQuery.SQLConnection.ClassName);
 end;
 
 end.
