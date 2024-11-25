@@ -107,7 +107,7 @@ type
 implementation
 
 uses
-  FileUtil, LazFileUtils, Math, RegExpr, StrUtils
+  FileUtil, LazFileUtils, Math, RegExpr, StrUtils, utils
   {$IfDef Windows}
   , Windows
   {$EndIf}
@@ -339,7 +339,7 @@ begin
 
       for Ver := GetCurrentDBVersion + 1 to AVer do
       begin
-        SQLScript.Script.{AddStrings}AddText(Provider.SQLCommands(Ver));
+        SQLScript.Script.{AddStrings}AddText(AddTrailingSemicolon(Provider.SQLCommands(Ver)));
       end;
 
       SQLScript.Execute;

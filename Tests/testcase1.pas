@@ -30,6 +30,7 @@ type
     procedure TestDifferentFileNames;
     procedure TestBuiltInScripts;
     procedure TestResourceScripts;
+    procedure TestMissedSemicolons;
   private
     Conn: TSQLConnection;
     Query: TSQLQuery;
@@ -54,10 +55,39 @@ type
     constructor Create; override;
   end;
 
+  { TUtilsTest }
+
+  TUtilsTest = class(TTestCase)
+  published
+    procedure TestAddTrailingSemicolon;
+  end;
+
 implementation
 
 uses
-  Forms, FileUtil, DatabaseVersioning, IniFiles;
+  Forms, FileUtil, DatabaseVersioning, Utils, IniFiles, StrUtils;
+
+{ TUtilsTest }
+
+procedure TUtilsTest.TestAddTrailingSemicolon;
+  procedure Test(const ASQL: String);
+  begin
+    AssertEquals('select * from tbl;', AddTrailingSemicolon(ASQL));
+  end;
+
+begin
+  // Trailing semicolon is missed
+  Test('select * from tbl');
+  Test('select * from tbl   ' + LineEnding + #9 {tab});
+
+  // Trailing semicolon exists
+  Test('select * from tbl;');
+  Test('select * from tbl;  ' + LineEnding + #9 {tab});
+
+  // Empty string
+  AssertFalse(ContainsStr(AddTrailingSemicolon('  ' + LineEnding + #9 {tab}), ';'))
+
+end;
 
 { TSqlite3Test }
 
@@ -220,6 +250,25 @@ begin
   AssertEquals(2, DBHlp.RowsCount('customers'));
 end;
 
+procedure TTestCase1.TestMissedSemicolons;
+const
+  TableName = 'tbl';
+begin
+  FreeAndNil(DBVer);
+  DBVer := TDBVersioningHelper.Create(Conn, Trans, ConcatPaths([SQLScriptsBaseDir, 'test04']));
+
+  DBVer.UpgradeTo(1); // 0 --> 1
+  DBVer.UpgradeToLatest; // 1 --> 4;
+  AssertFalse(DBVer.UpgradeNeeded);
+  AssertEquals(4, DBVer.CurrentVersion);
+  AssertEquals(5, DBHlp.ColumnsCount(TableName));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'id'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'Email'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'FirstName'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'LastName'));
+  AssertTrue(DBHlp.ColumnExists(TableName, 'DOB'));
+end;
+
 procedure TTestCase1.UpgradeToIncorrectVersion;
 begin
   DBVer.UpgradeTo(9999);
@@ -342,6 +391,7 @@ end;
 
 initialization
 
+  RegisterTest(TUtilsTest);
   RegisterTest(TSqlite3Test);
   RegisterTest(TMysql57Test);
 end.
