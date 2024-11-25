@@ -328,6 +328,10 @@ var
   Ver, OldVer: Integer;
   SQLScript: TSQLScript;
 begin
+  // Fixme: в Mysql транзакции (точнее ROLLBACK) не работают с командами CREATE TABLE, ALTER TABLE и пр...
+  // см.: https://dev.mysql.com/doc/refman/5.7/en/cannot-roll-back.html
+  // как же тогда сделать откат изменеия схемы бд к предыдущему состоянию в случае ошибки?
+
   if {not UpgradeNeeded} CurrentVersion = AVer then
     Exit;
 
