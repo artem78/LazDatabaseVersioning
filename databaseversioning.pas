@@ -85,6 +85,7 @@ type
 
   EDBVersioningException = class(Exception);
 
+  { @exclude }
   TDBUpgradeProvider = class
     public
       function LatestVersion: Integer; virtual; abstract;
@@ -93,6 +94,7 @@ type
 
   { TDBFileUpgradeProvider }
 
+  { @exclude }
   TDBFileUpgradeProvider = class(TDBUpgradeProvider)
     private
       SQLDir: String;
@@ -108,6 +110,7 @@ type
 
   { TDBArrayUpgradeProvider }
 
+  { @exclude }
   TDBArrayUpgradeProvider = class(TDBUpgradeProvider)
     private
       SQLScripts: array of String;
@@ -122,6 +125,7 @@ type
 
   { TDBResourceUpgradeProvider }
 
+  { @exclude }
   TDBResourceUpgradeProvider = class(TDBUpgradeProvider)
     private
       ResourcePrefix: String;
