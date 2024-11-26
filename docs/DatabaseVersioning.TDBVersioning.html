@@ -28,23 +28,63 @@ This is the class for managing database schema upgrades</p>
 <span id="PasDoc-Fields"></span><h3 class="summary">Fields</h3>
 <table class="summary wide_list">
 <tr class="list">
-<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#SQLDir">SQLDir</a></strong>: String;</code></td>
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#SQLQuery">SQLQuery</a></strong>: TSQLQuery;</code></td>
 </tr>
 <tr class="list2">
-<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#SQLScripts">SQLScripts</a></strong>: array of String;</code></td>
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code><strong><a href="DatabaseVersioning.TDBVersioning.html#Provider">Provider</a></strong>: <a href="DatabaseVersioning.TDBUpgradeProvider.html">TDBUpgradeProvider</a>;</code></td>
 </tr>
 </table>
 <span id="PasDoc-Methods"></span><h3 class="summary">Methods</h3>
 <table class="summary wide_list">
 <tr class="list">
-<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Create">Create</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; ASQLDir: String = '');</code></td>
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>procedure <strong><a href="DatabaseVersioning.TDBVersioning.html#CreateDBInfoTable">CreateDBInfoTable</a></strong>;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#GetCurrentDBVersion">GetCurrentDBVersion</a></strong>: Integer;</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>procedure <strong><a href="DatabaseVersioning.TDBVersioning.html#SetCurrentDBVersion">SetCurrentDBVersion</a></strong>(AVer: Integer);</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#GetParam">GetParam</a></strong>(AParam: String): String;</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>procedure <strong><a href="DatabaseVersioning.TDBVersioning.html#SetParam">SetParam</a></strong>(AParam, AValue: String);</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#HasParam">HasParam</a></strong>(AParam: String): Boolean;</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#GetLatestVersion">GetLatestVersion</a></strong>: Integer;</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#IsSqlite">IsSqlite</a></strong>: Boolean;</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><code>function <strong><a href="DatabaseVersioning.TDBVersioning.html#IsMysql">IsMysql</a></strong>: Boolean;</code></td>
 </tr>
 <tr class="list2">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Create">Create</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; ASQLDir: String = '');</code></td>
+</tr>
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
 <td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#Create">Create</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; const ASQLScripts: array of String);</code></td>
+</tr>
+<tr class="list2">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><code>constructor <strong><a href="DatabaseVersioning.TDBVersioning.html#CreateFromResources">CreateFromResources</a></strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; AResourcePrefix: String = 'SQL_SCRIPT_');</code></td>
 </tr>
 <tr class="list">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
@@ -71,32 +111,106 @@ This is the class for managing database schema upgrades</p>
 <table class="summary wide_list">
 <tr class="list">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#CurrentVersion">CurrentVersion</a></strong>: Integer read GetCurrentDBVersion;</code></td>
+<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#CurrentVersion">CurrentVersion</a></strong>: Integer read <a href="DatabaseVersioning.TDBVersioning.html#GetCurrentDBVersion">GetCurrentDBVersion</a>;</code></td>
 </tr>
 <tr class="list2">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#LatestVersion">LatestVersion</a></strong>: Integer read GetLatestVersion;</code></td>
+<td class="itemcode"><code>property <strong><a href="DatabaseVersioning.TDBVersioning.html#LatestVersion">LatestVersion</a></strong>: Integer read <a href="DatabaseVersioning.TDBVersioning.html#GetLatestVersion">GetLatestVersion</a>;</code></td>
 </tr>
 </table>
 <h2 class="description">Description</h2>
 <h3 class="detail">Fields</h3>
 <table class="detail wide_list">
 <tr class="list">
-<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><span id="SQLDir"></span><code><strong>SQLDir</strong>: String;</code></td>
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="SQLQuery"></span><code><strong>SQLQuery</strong>: TSQLQuery;</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+private</p>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="Provider"></span><code><strong>Provider</strong>: <a href="DatabaseVersioning.TDBUpgradeProvider.html">TDBUpgradeProvider</a>;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<h3 class="detail">Methods</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="CreateDBInfoTable"></span><code>procedure <strong>CreateDBInfoTable</strong>;</code></td>
 </tr>
 <tr><td colspan="2">
 &nbsp;</td></tr>
 </table>
 <table class="detail wide_list">
 <tr class="list">
-<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><span id="SQLScripts"></span><code><strong>SQLScripts</strong>: array of String;</code></td>
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="GetCurrentDBVersion"></span><code>function <strong>GetCurrentDBVersion</strong>: Integer;</code></td>
 </tr>
 <tr><td colspan="2">
 &nbsp;</td></tr>
 </table>
-<h3 class="detail">Methods</h3>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="SetCurrentDBVersion"></span><code>procedure <strong>SetCurrentDBVersion</strong>(AVer: Integer);</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="GetParam"></span><code>function <strong>GetParam</strong>(AParam: String): String;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="SetParam"></span><code>procedure <strong>SetParam</strong>(AParam, AValue: String);</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="HasParam"></span><code>function <strong>HasParam</strong>(AParam: String): Boolean;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="GetLatestVersion"></span><code>function <strong>GetLatestVersion</strong>: Integer;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="IsSqlite"></span><code>function <strong>IsSqlite</strong>: Boolean;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="protected.gif" alt="Protected" title="Protected"></a></td>
+<td class="itemcode"><span id="IsMysql"></span><code>function <strong>IsMysql</strong>: Boolean;</code></td>
+</tr>
+<tr><td colspan="2">
+&nbsp;</td></tr>
+</table>
 <table class="detail wide_list">
 <tr class="list">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
@@ -120,6 +234,21 @@ This is the class for managing database schema upgrades</p>
 <dl class="parameters">
 <dt>ASQLScripts</dt>
 <dd>Array of SQL commands. Each item may contains more than one command separated with semicolon (<strong>;</strong>). Multiline strings allowed. Array indexes linked with versions (first item &mdash; version 1, second item &mdash; version 2, etc...).</dd>
+</dl>
+</td></tr>
+</table>
+<table class="detail wide_list">
+<tr class="list">
+<td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
+<td class="itemcode"><span id="CreateFromResources"></span><code>constructor <strong>CreateFromResources</strong>(AConnection: TSQLConnection; ATransaction: TSQLTransaction; AResourcePrefix: String = 'SQL_SCRIPT_');</code></td>
+</tr>
+<tr><td colspan="2">
+<p>
+ SQL scripts stored as RCDATA resources named SQL_SCRIPT_1, SQL_SCRIPT_2, SQL_SCRIPT_3, etc... Prefix may be changes with AResourcePrefix param.</p>
+<h6 class="description_section">Parameters</h6>
+<dl class="parameters">
+<dt>AResourcePrefix</dt>
+<dd>Prefix for resource names</dd>
 </dl>
 </td></tr>
 </table>
@@ -192,7 +321,7 @@ Checks if database not empty and has any upgrades applied. For the first run sho
 <table class="detail wide_list">
 <tr class="list">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><span id="CurrentVersion"></span><code>property <strong>CurrentVersion</strong>: Integer read GetCurrentDBVersion;</code></td>
+<td class="itemcode"><span id="CurrentVersion"></span><code>property <strong>CurrentVersion</strong>: Integer read <a href="DatabaseVersioning.TDBVersioning.html#GetCurrentDBVersion">GetCurrentDBVersion</a>;</code></td>
 </tr>
 <tr><td colspan="2">
 <p>
@@ -202,7 +331,7 @@ Returns the version of the database it is in</p>
 <table class="detail wide_list">
 <tr class="list">
 <td class="visibility"><a href="legend.html"><img  src="public.gif" alt="Public" title="Public"></a></td>
-<td class="itemcode"><span id="LatestVersion"></span><code>property <strong>LatestVersion</strong>: Integer read GetLatestVersion;</code></td>
+<td class="itemcode"><span id="LatestVersion"></span><code>property <strong>LatestVersion</strong>: Integer read <a href="DatabaseVersioning.TDBVersioning.html#GetLatestVersion">GetLatestVersion</a>;</code></td>
 </tr>
 <tr><td colspan="2">
 <p>

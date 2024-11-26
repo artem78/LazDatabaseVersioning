@@ -46,6 +46,10 @@ type
         version 2, etc...).) }
       constructor Create(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         const ASQLScripts: array of String);
+
+      { @param(AResourcePrefix Prefix for resource names) SQL scripts stored as
+        RCDATA resources named SQL_SCRIPT_1, SQL_SCRIPT_2, SQL_SCRIPT_3, etc...
+        Prefix may be changes with AResourcePrefix param. }
       constructor CreateFromResources(AConnection: TSQLConnection; ATransaction: TSQLTransaction;
         AResourcePrefix: String = 'SQL_SCRIPT_');
       destructor Destroy; override;
