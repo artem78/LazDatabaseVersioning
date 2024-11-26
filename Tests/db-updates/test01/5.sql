@@ -1,4 +1,4 @@
---write some data
+-- write some data
 INSERT INTO t1 (str, flag, x, y) VALUES ('alpha', 1, 7, 9);
 INSERT INTO t1 (str, flag, x, y) VALUES ('beta', 0, 9, 3);
 INSERT INTO t1 (str, flag, x, y) VALUES ('gamma', 0, 3, 1);

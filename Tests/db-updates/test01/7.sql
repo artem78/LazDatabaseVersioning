@@ -1,3 +1,3 @@
 CREATE TABLE t4 (
-    `field` VARCHAR
+    `field` VARCHAR(128)
 );

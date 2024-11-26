@@ -1,4 +1,4 @@
 CREATE TABLE customers(
     `id` INTEGER,
-    `name` STRING
+    `name` VARCHAR(128)
 );
