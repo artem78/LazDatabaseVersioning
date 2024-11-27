@@ -4,7 +4,7 @@ This will help you to auto upgrade database scheme.
 
 ## Limitations
 
-- Sqlite only (not tested with other databases)
+- Works with SQLite and MySQL only (not tested with other databases)
 
 ## How to use and examples
 
