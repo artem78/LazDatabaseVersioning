@@ -1,0 +1,101 @@
+object EditContactForm: TEditContactForm
+  Left = 463
+  Height = 223
+  Top = 311
+  Width = 281
+  BorderStyle = bsDialog
+  Caption = 'Edit contact'
+  ClientHeight = 223
+  ClientWidth = 281
+  OnShow = FormShow
+  Position = poMainFormCenter
+  LCLVersion = '2.2.4.0'
+  object Label1: TLabel
+    Left = 16
+    Height = 16
+    Top = 22
+    Width = 62
+    Caption = 'First name'
+    ParentColor = False
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 16
+    Top = 61
+    Width = 61
+    Caption = 'Last name'
+    ParentColor = False
+  end
+  object FirstNameDBEdit: TDBEdit
+    Left = 104
+    Height = 25
+    Top = 16
+    Width = 160
+    DataField = 'first_name'
+    DataSource = MainForm.ContactsDataSource
+    MaxLength = 0
+    TabOrder = 0
+  end
+  object LastNameDBEdit: TDBEdit
+    Left = 104
+    Height = 25
+    Top = 56
+    Width = 160
+    DataField = 'last_name'
+    DataSource = MainForm.ContactsDataSource
+    MaxLength = 0
+    TabOrder = 1
+  end
+  object ButtonPanel1: TButtonPanel
+    Left = 6
+    Height = 42
+    Top = 175
+    Width = 269
+    OKButton.Name = 'OKButton'
+    OKButton.DefaultCaption = True
+    HelpButton.Name = 'HelpButton'
+    HelpButton.DefaultCaption = True
+    CloseButton.Name = 'CloseButton'
+    CloseButton.DefaultCaption = True
+    CancelButton.Name = 'CancelButton'
+    CancelButton.DefaultCaption = True
+    TabOrder = 2
+    ShowButtons = [pbOK, pbCancel]
+  end
+  object Label3: TLabel
+    Left = 16
+    Height = 16
+    Top = 99
+    Width = 39
+    Caption = 'Phone'
+    ParentColor = False
+  end
+  object Label4: TLabel
+    Left = 16
+    Height = 16
+    Top = 132
+    Width = 33
+    Caption = 'Email'
+    ParentColor = False
+  end
+  object PhoneDBEdit: TDBEdit
+    Left = 104
+    Height = 25
+    Top = 94
+    Width = 160
+    DataField = 'phone'
+    DataSource = MainForm.ContactsDataSource
+    MaxLength = 0
+    TabOrder = 3
+  end
+  object EmailDBEdit: TDBEdit
+    Left = 104
+    Height = 25
+    Top = 128
+    Width = 160
+    DataField = 'email'
+    DataSource = MainForm.ContactsDataSource
+    MaxLength = 0
+    TabOrder = 4
+  end
+end
