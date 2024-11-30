@@ -1,0 +1,118 @@
+object MainForm: TMainForm
+  Left = 270
+  Height = 631
+  Top = 56
+  Width = 776
+  Caption = 'Database versioning Demo (v1.0)'
+  ClientHeight = 631
+  ClientWidth = 776
+  OnCreate = FormCreate
+  OnDestroy = FormDestroy
+  LCLVersion = '2.2.4.0'
+  object ContactsDBGrid: TDBGrid
+    Left = 16
+    Height = 368
+    Top = 40
+    Width = 640
+    Anchors = [akTop, akLeft, akRight]
+    Color = clWindow
+    Columns = <>
+    DataSource = ContactsDataSource
+    ReadOnly = True
+    TabOrder = 0
+  end
+  object AddContactButton: TButton
+    Left = 680
+    Height = 25
+    Top = 40
+    Width = 75
+    Anchors = [akTop, akRight]
+    Caption = 'Add'
+    OnClick = AddContactButtonClick
+    TabOrder = 1
+  end
+  object EditContactButton: TButton
+    Left = 680
+    Height = 25
+    Top = 80
+    Width = 75
+    Anchors = [akTop, akRight]
+    Caption = 'Edit'
+    OnClick = EditContactButtonClick
+    TabOrder = 2
+  end
+  object DeleteContactButton: TButton
+    Left = 680
+    Height = 25
+    Top = 120
+    Width = 75
+    Anchors = [akTop, akRight]
+    Caption = 'Delete'
+    OnClick = DeleteContactButtonClick
+    TabOrder = 3
+  end
+  object LogMemo: TMemo
+    Left = 16
+    Height = 138
+    Top = 472
+    Width = 640
+    Anchors = [akTop, akLeft, akRight, akBottom]
+    ReadOnly = True
+    ScrollBars = ssAutoBoth
+    TabOrder = 4
+  end
+  object Label1: TLabel
+    Left = 16
+    Height = 16
+    Top = 448
+    Width = 24
+    Caption = 'Log'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object Label2: TLabel
+    Left = 16
+    Height = 16
+    Top = 16
+    Width = 56
+    Caption = 'Contacts'
+    Font.Style = [fsBold]
+    ParentColor = False
+    ParentFont = False
+  end
+  object ContactsSQLQuery: TSQLQuery
+    FieldDefs = <>
+    Database = SQLite3Connection1
+    Transaction = SQLTransaction1
+    SQL.Strings = (
+      'SELECT * FROM `contacts`'
+    )
+    Params = <>
+    Macros = <>
+    Left = 360
+    Top = 152
+  end
+  object SQLite3Connection1: TSQLite3Connection
+    Connected = True
+    LoginPrompt = False
+    DatabaseName = 'database.sqlite3'
+    KeepConnection = False
+    Transaction = SQLTransaction1
+    CharSet = 'utf-8'
+    AlwaysUseBigint = False
+    Left = 360
+    Top = 64
+  end
+  object SQLTransaction1: TSQLTransaction
+    Active = True
+    Database = SQLite3Connection1
+    Left = 496
+    Top = 64
+  end
+  object ContactsDataSource: TDataSource
+    DataSet = ContactsSQLQuery
+    Left = 496
+    Top = 152
+  end
+end
