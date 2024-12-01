@@ -2,7 +2,7 @@
 <CONFIG>
   <Package Version="5">
     <Name Value="LazDatabaseVersioning"/>
-    <Type Value="RunAndDesignTime"/>
+    <Type Value="RunTimeOnly"/>
     <Author Value="artem78 &lt;megabyte1024@ya.ru>"/>
     <CompilerOptions>
       <Version Value="11"/>
